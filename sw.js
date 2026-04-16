@@ -1,14 +1,20 @@
-const CACHE = 'still-point-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'still-point-v2';
+
+// Exclude all API calls and Netlify functions from caching
+function shouldBypass(url) {
+    return url.includes('api.anthropic.com') ||
+           url.includes('api.openai.com')    ||
+           url.includes('supabase.co')       ||
+           url.includes('/.netlify/functions/');
+}
 
 self.addEventListener('install', e => {
-    e.waitUntil(
-        caches.open(CACHE).then(c => c.addAll(ASSETS))
-    );
+    // Skip waiting so new service worker activates immediately
     self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
+    // Delete all old caches on activation
     e.waitUntil(
         caches.keys().then(keys =>
             Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
@@ -18,13 +24,19 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-    // Network first for API calls
-    if (e.request.url.includes('api.anthropic.com') ||
-        e.request.url.includes('api.openai.com') ||
-        e.request.url.includes('supabase.co')) {
-        return;
-    }
+    // Always bypass for API calls and functions
+    if (shouldBypass(e.request.url)) return;
+
+    // Network first for everything else — always gets latest code
+    // Falls back to cache only if network fails (true offline support)
     e.respondWith(
-        caches.match(e.request).then(cached => cached || fetch(e.request))
+        fetch(e.request)
+            .then(res => {
+                // Cache a copy of the fresh response
+                const clone = res.clone();
+                caches.open(CACHE).then(c => c.put(e.request, clone));
+                return res;
+            })
+            .catch(() => caches.match(e.request))
     );
 });
