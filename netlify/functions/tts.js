@@ -33,7 +33,7 @@ exports.handler = async (event) => {
             },
             body: JSON.stringify({
                 model: 'tts-1',
-                voice: 'nova',  // warm, natural — change to 'shimmer' for softer, 'fable' for more expressive
+                voice: 'shimmer',
                 input: text,
                 speed: 0.92     // slightly slower — more contemplative
             })
