@@ -267,6 +267,20 @@
         <div class="login-error" id="login-error"></div>
     </div>
 
+    <!-- Set Password (recovery / invite flow) -->
+    <div id="set-pwd-screen" style="display:none;flex-direction:column;align-items:center;gap:1.6rem;width:100%">
+        <div>
+            <div class="wordmark">Still Point</div>
+            <div class="wordmark-sub">set your password</div>
+        </div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:0.7rem">
+            <div class="field"><input id="new-password" type="password" placeholder="new password" autocomplete="new-password"></div>
+            <div class="field"><input id="confirm-password" type="password" placeholder="confirm password" autocomplete="new-password"></div>
+        </div>
+        <button class="btn-enter" onclick="handleSetPassword()">Set Password</button>
+        <div class="login-error" id="set-pwd-error"></div>
+    </div>
+
     <!-- Main -->
     <div id="main-screen">
         <div class="label-state" id="state-label">ready</div>
@@ -290,8 +304,8 @@
 // CONFIGURATION  —  Update these with your credentials
 // ════════════════════════════════════════════════════════
 const CONFIG = {
-    ANTHROPIC_API_KEY : 'YOUR_ANTHROPIC_API_KEY',
-    OPENAI_API_KEY    : 'YOUR_OPENAI_API_KEY',
+    // Anthropic and OpenAI keys live in Netlify environment variables — never here.
+    // Supabase anon key is safe in the browser (security enforced via RLS).
     SUPABASE_URL      : 'YOUR_SUPABASE_URL',
     SUPABASE_ANON_KEY : 'YOUR_SUPABASE_ANON_KEY',
 };
@@ -571,8 +585,36 @@ async function handleLogout() {
 }
 
 async function initAuth() {
+    // Detect password recovery or invite token in URL hash (best practice pattern)
+    const params = new URLSearchParams(window.location.hash.replace('#', '?'));
+    const type = params.get('type');
+    if (type === 'recovery' || type === 'invite') {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) { showSetPassword(); return; }
+    }
+    // Normal session check
     const { data: { session } } = await sb.auth.getSession();
     if (session) { S.user = session.user; showMain(); }
+}
+
+async function showSetPassword() {
+    document.getElementById('login-screen').style.display   = 'none';
+    document.getElementById('set-pwd-screen').style.display = 'flex';
+}
+
+async function handleSetPassword() {
+    const pwd     = document.getElementById('new-password').value;
+    const confirm = document.getElementById('confirm-password').value;
+    const errEl   = document.getElementById('set-pwd-error');
+    errEl.textContent = '';
+    if (pwd.length < 8)  { errEl.textContent = 'Password must be at least 8 characters.'; return; }
+    if (pwd !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
+    const { data, error } = await sb.auth.updateUser({ password: pwd });
+    if (error) { errEl.textContent = error.message; return; }
+    S.user = data.user;
+    window.history.replaceState(null, '', window.location.pathname);
+    document.getElementById('set-pwd-screen').style.display = 'none';
+    showMain();
 }
 
 // ════════════════════════════════════════════════════════
@@ -664,55 +706,86 @@ function speak(text) {
 // ════════════════════════════════════════════════════════
 async function transcribe(blob) {
     setLabel('transcribing...');
-    const form = new FormData();
+
+    // File size gate: Netlify function body limit ~6MB, base64 adds ~33% overhead
+    const MAX_BYTES = 4 * 1024 * 1024; // 4MB raw limit
+    if (blob.size > MAX_BYTES) {
+        showError('Recording too long. Please keep answers under a few minutes.');
+        return null;
+    }
+
     let fname = 'audio.webm';
     if (blob.type.includes('mp4')) fname = 'audio.mp4';
     if (blob.type.includes('ogg')) fname = 'audio.ogg';
-    form.append('file', blob, fname);
-    form.append('model', 'whisper-1');
-    form.append('language', 'en');
+
     try {
-        const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        const audioBase64 = await blobToBase64(blob);
+        const res = await fetch('/.netlify/functions/whisper', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}` },
-            body: form
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audioBase64, filename: fname })
         });
+        if (res.status === 401) { showError('Whisper API key error. Check Netlify environment variables.'); return null; }
         if (!res.ok) throw new Error(await res.text());
         const d = await res.json();
         let t = (d.text || '').trim();
-        // Strip trailing "next" cue
         t = t.replace(/[,.]?\s*\bnext\b\s*\.?\s*$/i, '').trim();
         return t;
-    } catch (e) {
+    } catch {
         showError('Transcription failed. Please try again.');
         return null;
     }
 }
 
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
 // ════════════════════════════════════════════════════════
 // CLAUDE
 // ════════════════════════════════════════════════════════
-async function claude(messages, system) {
+async function claude(messages, system, _attempt = 0) {
+    const MAX_RETRIES = 6;
     try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await fetch('/.netlify/functions/claude', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': CONFIG.ANTHROPIC_API_KEY,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true',
-            },
-            body: JSON.stringify({
-                model: 'claude-opus-4-6',
-                max_tokens: 1024,
-                system: system || SYSTEM_PROMPT,
-                messages
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages, system: system || SYSTEM_PROMPT })
         });
+
+        // 529/503 — overloaded, retry with exponential backoff
+        if ((res.status === 529 || res.status === 503) && _attempt < MAX_RETRIES) {
+            const waitMs  = Math.min(Math.pow(2, _attempt) * 1000, 30000);
+            const waitSec = Math.round(waitMs / 1000);
+            setLabel(`busy — retrying in ${waitSec}s (${_attempt + 1}/${MAX_RETRIES})`);
+            await sleep(waitMs);
+            return claude(messages, system, _attempt + 1);
+        }
+
+        // 401 — bad key, permanent, don't retry
+        if (res.status === 401) {
+            showError('API key error. Check ANTHROPIC_API_KEY in Netlify environment variables.');
+            return null;
+        }
+
+        // 400 — bad request, don't retry
+        if (res.status === 400) {
+            showError('Request error. Please try again.');
+            return null;
+        }
+
         if (!res.ok) throw new Error(await res.text());
-        return (await res.json()).content[0].text;
+
+        const data = await res.json();
+        return data.content[0].text;
+
     } catch {
-        showError('API connection failed. Check your key and try again.');
+        showError('Connection failed. Please check your network and try again.');
         return null;
     }
 }
