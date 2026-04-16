@@ -442,7 +442,7 @@ async function exportCSV() {
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     const date = new Date().toISOString().split('T')[0];
-    a.href = url; a.download = `the-practice-${date}${type ? '-' + type : ''}.csv`;
+    a.href = url; a.download = `still-point-${date}${type ? '-' + type : ''}.csv`;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
 }
