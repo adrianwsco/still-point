@@ -713,8 +713,9 @@ async function speak(text) {
             audio.play().catch(() => { setGlow('idle'); S.speaking = false; resolve(); });
         });
 
-    } catch {
-        // Fallback to browser TTS if OpenAI TTS fails
+    } catch (err) {
+        // Temporary: surface error so we can diagnose
+        showError('TTS error: ' + (err && err.message ? err.message : String(err)));
         await fallbackSpeak(clean);
         setGlow('idle'); S.speaking = false;
     }
