@@ -41,7 +41,24 @@ The portal only needs `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
 
 ---
 
-## Step 3 — App Icon (optional but recommended for iOS PWA)
+## Step 3 — Netlify Environment Variables
+
+After deploying to Netlify, go to your site → **Site configuration → Environment variables → Add a variable**.
+
+Add these three:
+
+| Key | Value |
+|---|---|
+| `ANTHROPIC_API_KEY` | your Anthropic key (`sk-ant-...`) |
+| `OPENAI_API_KEY` | your OpenAI key (`sk-...`) |
+
+The Supabase keys stay in the HTML — that is correct per Supabase's security model.
+
+After adding the variables, trigger a **Redeploy** from the Netlify dashboard so the functions pick them up.
+
+---
+
+## Step 4 — App Icon (optional but recommended for iOS PWA)
 
 Create two PNG icons:
 - `icon.png` — 192×192 pixels
@@ -51,7 +68,7 @@ Dark background (#080808), simple mark. Place them in the root folder.
 
 ---
 
-## Step 4 — Deploy to Netlify
+## Step 5 — Deploy to Netlify
 
 1. Push all files to a GitHub repo
 2. Connect the repo to Netlify
@@ -60,7 +77,7 @@ Dark background (#080808), simple mark. Place them in the root folder.
 
 ---
 
-## Step 5 — Install on iPhone
+## Step 6 — Install on iPhone
 
 1. Open the app URL in Safari on your iPhone
 2. Tap the **Share** button (box with arrow)
@@ -72,7 +89,7 @@ Tap it — no browser chrome, full screen, dark.
 
 ---
 
-## Step 6 — First Use
+## Step 7 — First Use
 
 1. Open the app
 2. Log in with your Supabase credentials
