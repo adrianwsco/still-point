@@ -297,7 +297,7 @@
 
 <button id="logout-btn" onclick="handleLogout()">leave</button>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
 // ════════════════════════════════════════════════════════
@@ -306,8 +306,8 @@
 const CONFIG = {
     // Anthropic and OpenAI keys live in Netlify environment variables — never here.
     // Supabase anon key is safe in the browser (security enforced via RLS).
-    SUPABASE_URL      : 'https://zfyxfetsfmncutbcnzfb.supabase.co',
-    SUPABASE_ANON_KEY : 'sb_publishable_L1R9hG3qzEVoa5B4zNAHEg_M2n1BUoG',
+    SUPABASE_URL      : 'YOUR_SUPABASE_URL',
+    SUPABASE_ANON_KEY : 'YOUR_SUPABASE_ANON_KEY',
 };
 
 // ════════════════════════════════════════════════════════
@@ -922,6 +922,9 @@ async function handleMicTap() {
 
     if (S.phase === 'idle') {
         await beginSelection();
+    } else if (S.phase === 'selecting') {
+        // User taps again to stop threshold recording and process
+        await processThresholdSelection();
     } else if (S.phase === 'listening') {
         // Manual stop (fallback for "next" detection failure)
         await processCurrentAnswer();
@@ -935,15 +938,16 @@ async function beginSelection() {
     setPractice(''); setQuestion('');
     setHint('speak your threshold');
 
-    // No auto-prompt — app is silent until user speaks
+    // Start recording — app waits silently for user to tap again to stop
     const started = await startRecording();
     if (!started) { S.phase = 'idle'; resetUI(); return; }
 
     setLabel('listening...');
+    setHint('tap again when done');
+    // Flow continues in processThresholdSelection() when user taps mic
+}
 
-    // Listen for up to 8 seconds
-    await sleep(8000);
-
+async function processThresholdSelection() {
     setLabel('processing...');
     const blob = await stopRecording();
     if (!blob) { resetState(); return; }
