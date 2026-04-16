@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Still Point — Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Lora:ital,wght@0,400;0,500&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg: #0a0a09;
+            --surface: #111110;
+            --border: rgba(180,140,70,0.15);
+            --text: rgba(220,200,170,0.88);
+            --text2: rgba(175,155,120,0.62);
+            --text3: rgba(130,110,80,0.40);
+            --amber: rgba(190,130,40,0.85);
+        }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'Lora', Georgia, serif;
+            min-height: 100vh; padding: 3rem 2rem;
+        }
+
+        header {
+            display: flex; align-items: baseline; gap: 2rem;
+            margin-bottom: 3rem; border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+        .portal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem; font-weight: 300;
+            letter-spacing: 0.2em; text-transform: uppercase;
+        }
+        .portal-sub {
+            font-family: 'Lora', serif; font-style: italic;
+            font-size: 0.78rem; color: var(--text3);
+        }
+
+        /* Auth */
+        #auth-panel {
+            max-width: 340px; display: flex;
+            flex-direction: column; gap: 0.8rem; margin-top: 3rem;
+        }
+        input {
+            width: 100%; background: var(--surface);
+            border: 1px solid var(--border); color: var(--text);
+            padding: 0.75rem 1rem; font-family: 'Lora', serif;
+            font-size: 0.85rem; border-radius: 3px; outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: rgba(190,130,40,0.4); }
+        input::placeholder { color: var(--text3); }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background: rgba(190,130,40,0.1);
+            border: 1px solid rgba(190,130,40,0.25);
+            color: var(--text); font-family: 'Lora', serif;
+            font-size: 0.8rem; letter-spacing: 0.15em;
+            text-transform: uppercase; border-radius: 3px;
+            cursor: pointer; transition: all 0.25s;
+        }
+        button:hover { background: rgba(190,130,40,0.18); }
+
+        /* Controls */
+        #controls {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+            align-items: center; margin-bottom: 2rem;
+        }
+        select {
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); padding: 0.6rem 0.9rem;
+            font-family: 'Lora', serif; font-size: 0.82rem;
+            border-radius: 3px; outline: none; cursor: pointer;
+        }
+        .btn-export {
+            margin-left: auto;
+            background: rgba(60,130,100,0.12);
+            border-color: rgba(60,130,100,0.25);
+        }
+        .btn-export:hover { background: rgba(60,130,100,0.22); }
+
+        /* Stats bar */
+        #stats-bar {
+            display: flex; gap: 2rem; margin-bottom: 1.5rem;
+            font-size: 0.76rem; color: var(--text3); letter-spacing: 0.08em;
+        }
+        #stats-bar span { color: var(--text2); }
+
+        /* Table */
+        .table-wrap { overflow-x: auto; }
+        table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.83rem;
+        }
+        th {
+            text-align: left; padding: 0.6rem 0.8rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300; letter-spacing: 0.12em;
+            text-transform: uppercase; font-size: 0.72rem;
+            color: var(--text3); border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 0.75rem 0.8rem; border-bottom: 1px solid rgba(180,140,70,0.06);
+            vertical-align: top; color: var(--text2);
+        }
+        tr:hover td { background: rgba(255,255,255,0.015); }
+
+        .badge {
+            display: inline-block; padding: 0.2rem 0.55rem;
+            border-radius: 2px; font-size: 0.68rem;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            background: rgba(190,130,40,0.1);
+            border: 1px solid rgba(190,130,40,0.18);
+            color: var(--amber);
+        }
+        .badge.meal      { background: rgba(60,130,80,0.1);  border-color: rgba(60,130,80,0.2);  color: rgba(100,180,120,0.8); }
+        .badge.morning   { background: rgba(130,100,40,0.1); border-color: rgba(130,100,40,0.2); color: rgba(190,150,70,0.8); }
+        .badge.training  { background: rgba(130,60,60,0.1);  border-color: rgba(130,60,60,0.2);  color: rgba(200,110,100,0.8); }
+        .badge.evening   { background: rgba(70,80,130,0.1);  border-color: rgba(70,80,130,0.2);  color: rgba(130,140,200,0.8); }
+        .badge.weekly    { background: rgba(90,60,130,0.1);  border-color: rgba(90,60,130,0.2);  color: rgba(160,130,200,0.8); }
+
+        .summary-cell { max-width: 500px; }
+        .summary-cell details summary {
+            cursor: pointer; color: var(--text3);
+            font-size: 0.75rem; letter-spacing: 0.08em;
+            list-style: none; user-select: none;
+        }
+        .summary-cell details summary::-webkit-details-marker { display: none; }
+        .json-view {
+            margin-top: 0.5rem; padding: 0.75rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 3px; font-family: 'Courier New', monospace;
+            font-size: 0.72rem; color: var(--text3);
+            white-space: pre-wrap; word-break: break-all;
+            max-height: 300px; overflow-y: auto;
+        }
+
+        .no-data {
+            text-align: center; padding: 4rem 2rem;
+            color: var(--text3); font-style: italic;
+        }
+
+        .logout-btn {
+            position: fixed; top: 1.5rem; right: 1.5rem;
+            font-size: 0.65rem; color: var(--text3);
+        }
+
+        #login-error { font-size: 0.75rem; color: rgba(200,80,70,0.7); min-height: 1rem; }
+        #load-more { display: none; margin: 2rem auto; }
+    </style>
+</head>
+<body>
+
+<button class="logout-btn" id="logout-btn" onclick="handleLogout()" style="display:none">leave</button>
+
+<header>
+    <div class="portal-title">Still Point</div>
+    <div class="portal-sub">review portal</div>
+</header>
+
+<!-- Auth -->
+<div id="auth-section">
+    <div id="auth-panel">
+        <input id="email" type="email" placeholder="email" autocomplete="email">
+        <input id="pwd" type="password" placeholder="password">
+        <button onclick="handleLogin()">Enter Portal</button>
+        <div id="login-error"></div>
+    </div>
+</div>
+
+<!-- Main content -->
+<div id="main-section" style="display:none">
+
+    <div id="controls">
+        <select id="filter-type" onchange="loadLogs()">
+            <option value="">all thresholds</option>
+            <option value="morning">morning</option>
+            <option value="meal">meal</option>
+            <option value="pre_training">pre-training</option>
+            <option value="post_training">post-training</option>
+            <option value="evening">evening</option>
+            <option value="pre_bed">pre-bed</option>
+            <option value="weekly">weekly sitting</option>
+        </select>
+        <select id="filter-days" onchange="loadLogs()">
+            <option value="30">last 30 days</option>
+            <option value="14">last 14 days</option>
+            <option value="7">last 7 days</option>
+            <option value="90">last 90 days</option>
+            <option value="365">last year</option>
+            <option value="0">all time</option>
+        </select>
+        <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+    </div>
+
+    <div id="stats-bar">
+        <div>entries: <span id="stat-count">—</span></div>
+        <div>first entry: <span id="stat-first">—</span></div>
+        <div>last entry: <span id="stat-last">—</span></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="logs-table">
+            <thead>
+                <tr>
+                    <th>date</th>
+                    <th>time</th>
+                    <th>threshold</th>
+                    <th>detail</th>
+                    <th>summary</th>
+                </tr>
+            </thead>
+            <tbody id="logs-body">
+                <tr><td colspan="5" class="no-data">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <button id="load-more" onclick="loadMore()">Load more</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+// ── CONFIG ── Update these
+const CONFIG = {
+    SUPABASE_URL      : 'YOUR_SUPABASE_URL',
+    SUPABASE_ANON_KEY : 'YOUR_SUPABASE_ANON_KEY',
+};
+
+const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+let allLogs = [];
+let currentOffset = 0;
+const PAGE_SIZE = 50;
+
+// ── Auth ──
+async function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const pwd   = document.getElementById('pwd').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+    if (error) { errEl.textContent = error.message; return; }
+    showPortal();
+}
+
+async function handleLogout() {
+    await sb.auth.signOut();
+    document.getElementById('auth-section').style.display = 'block';
+    document.getElementById('main-section').style.display = 'none';
+    document.getElementById('logout-btn').style.display   = 'none';
+}
+
+async function initAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) showPortal();
+}
+
+function showPortal() {
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('main-section').style.display = 'block';
+    document.getElementById('logout-btn').style.display   = 'block';
+    loadLogs();
+}
+
+// ── Load Logs ──
+async function loadLogs() {
+    currentOffset = 0;
+    allLogs = [];
+    const tbody = document.getElementById('logs-body');
+    tbody.innerHTML = '<tr><td colspan="5" class="no-data">Loading...</td></tr>';
+
+    const { data, error } = await fetchLogs(0);
+    if (error) { tbody.innerHTML = `<tr><td colspan="5" class="no-data">Error: ${error.message}</td></tr>`; return; }
+
+    allLogs = data || [];
+    renderLogs();
+    updateStats();
+    document.getElementById('load-more').style.display = allLogs.length === PAGE_SIZE ? 'block' : 'none';
+}
+
+async function loadMore() {
+    currentOffset += PAGE_SIZE;
+    const { data } = await fetchLogs(currentOffset);
+    if (data && data.length) {
+        allLogs = allLogs.concat(data);
+        renderLogs();
+        document.getElementById('load-more').style.display = data.length === PAGE_SIZE ? 'block' : 'none';
+    } else {
+        document.getElementById('load-more').style.display = 'none';
+    }
+}
+
+async function fetchLogs(offset) {
+    const type = document.getElementById('filter-type').value;
+    const days = parseInt(document.getElementById('filter-days').value);
+
+    let query = sb.from('logs')
+        .select('id, threshold_type, meal_time, training_type, summary, created_at')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
+    if (type)  query = query.eq('threshold_type', type);
+    if (days > 0) {
+        const since = new Date(Date.now() - days * 86400000).toISOString();
+        query = query.gte('created_at', since);
+    }
+
+    return await query;
+}
+
+function renderLogs() {
+    const tbody = document.getElementById('logs-body');
+    if (!allLogs.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="no-data">No entries yet.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = allLogs.map(log => {
+        const dt   = new Date(log.created_at);
+        const date = dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
+        const time = dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+        const badge = getBadge(log.threshold_type);
+        const detail = getDetail(log);
+        const snippet = getSnippet(log.summary);
+
+        return `<tr>
+            <td>${date}</td>
+            <td style="color:var(--text3);font-size:0.8rem">${time}</td>
+            <td><span class="badge ${getBadgeClass(log.threshold_type)}">${badge}</span></td>
+            <td style="font-size:0.78rem;color:var(--text3)">${detail}</td>
+            <td class="summary-cell">
+                <div style="color:var(--text2);font-size:0.82rem;margin-bottom:0.3rem">${snippet}</div>
+                <details>
+                    <summary>↓ full json</summary>
+                    <div class="json-view">${JSON.stringify(log.summary, null, 2)}</div>
+                </details>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function getBadge(type) {
+    const map = {
+        morning:'morning', meal:'meal', pre_training:'pre-train',
+        post_training:'post-train', evening:'evening',
+        pre_bed:'pre-bed', weekly:'weekly'
+    };
+    return map[type] || type;
+}
+function getBadgeClass(type) {
+    if (type === 'morning') return 'morning';
+    if (type === 'meal') return 'meal';
+    if (type.includes('training')) return 'training';
+    if (type === 'evening' || type === 'pre_bed') return 'evening';
+    if (type === 'weekly') return 'weekly';
+    return '';
+}
+function getDetail(log) {
+    if (log.meal_time) return log.meal_time;
+    if (log.training_type) return log.training_type;
+    if (log.threshold_type === 'weekly' && log.summary?.is_supplemental) return 'supplemental';
+    return '';
+}
+function getSnippet(summary) {
+    if (!summary) return '—';
+    const candidates = [
+        summary.open_notes, summary.body_needs, summary.setting_down,
+        summary.memorable_from_today, summary.most_authentic_moments,
+        summary.coming_week_needs
+    ];
+    const val = candidates.find(v => v && typeof v === 'string' && v.length > 3);
+    if (!val) {
+        // Show first non-null field
+        for (const [k,v] of Object.entries(summary)) {
+            if (k !== 'threshold_type' && k !== 'is_supplemental' && v !== null && v !== undefined) {
+                return `${k.replace(/_/g,' ')}: ${v}`;
+            }
+        }
+        return '—';
+    }
+    return val.length > 100 ? val.slice(0, 100) + '…' : val;
+}
+
+function updateStats() {
+    document.getElementById('stat-count').textContent = allLogs.length;
+    if (allLogs.length) {
+        const dates = allLogs.map(l => new Date(l.created_at));
+        const fmt = d => d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
+        document.getElementById('stat-first').textContent = fmt(new Date(Math.min(...dates)));
+        document.getElementById('stat-last').textContent  = fmt(new Date(Math.max(...dates)));
+    }
+}
+
+// ── CSV Export ──
+async function exportCSV() {
+    // Fetch ALL logs for export (ignore pagination)
+    const type = document.getElementById('filter-type').value;
+    const days = parseInt(document.getElementById('filter-days').value);
+
+    let query = sb.from('logs')
+        .select('*')
+        .order('created_at', { ascending: true });
+    if (type) query = query.eq('threshold_type', type);
+    if (days > 0) {
+        const since = new Date(Date.now() - days * 86400000).toISOString();
+        query = query.gte('created_at', since);
+    }
+
+    const { data, error } = await query;
+    if (error || !data || !data.length) { alert('No data to export.'); return; }
+
+    // Collect all unique keys from summary objects
+    const summaryKeys = new Set();
+    data.forEach(row => {
+        if (row.summary && typeof row.summary === 'object') {
+            Object.keys(row.summary).forEach(k => summaryKeys.add(k));
+        }
+    });
+
+    // Build CSV
+    const baseHeaders = ['id','created_at','threshold_type','meal_time','training_type'];
+    const allHeaders  = [...baseHeaders, ...summaryKeys];
+    const escape = v => {
+        if (v === null || v === undefined) return '';
+        const s = String(v).replace(/"/g,'""');
+        return s.includes(',') || s.includes('\n') || s.includes('"') ? `"${s}"` : s;
+    };
+
+    const rows = [allHeaders.join(',')];
+    data.forEach(row => {
+        const values = baseHeaders.map(h => escape(row[h]));
+        summaryKeys.forEach(k => values.push(escape(row.summary?.[k] ?? '')));
+        rows.push(values.join(','));
+    });
+
+    const csv = rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const date = new Date().toISOString().split('T')[0];
+    a.href = url; a.download = `the-practice-${date}${type ? '-' + type : ''}.csv`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+initAuth();
+</script>
+</body>
+</html>
