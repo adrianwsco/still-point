@@ -306,8 +306,8 @@
 const CONFIG = {
     // Anthropic and OpenAI keys live in Netlify environment variables — never here.
     // Supabase anon key is safe in the browser (security enforced via RLS).
-    SUPABASE_URL      : 'https://zfyxfetsfmncutbcnzfb.supabase.co',
-    SUPABASE_ANON_KEY : 'sb_publishable_L1R9hG3qzEVoa5B4zNAHEg_M2n1BUoG',
+    SUPABASE_URL      : 'YOUR_SUPABASE_URL',
+    SUPABASE_ANON_KEY : 'YOUR_SUPABASE_ANON_KEY',
 };
 
 // ════════════════════════════════════════════════════════
@@ -684,28 +684,70 @@ function stopRecognition() {
 // ════════════════════════════════════════════════════════
 // TTS
 // ════════════════════════════════════════════════════════
-function speak(text) {
+async function speak(text) {
+    const clean = text.replace(/\n/g, ' ').trim();
+    if (!clean) return;
+
+    setGlow('speaking'); S.speaking = true;
+
+    try {
+        const res = await fetch('/.netlify/functions/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: clean })
+        });
+
+        if (!res.ok) throw new Error('TTS failed');
+
+        const { audioBase64 } = await res.json();
+
+        await new Promise((resolve) => {
+            const audioBlob = base64ToBlob(audioBase64, 'audio/mpeg');
+            const audioUrl  = URL.createObjectURL(audioBlob);
+            const audio     = new Audio(audioUrl);
+            audio.onended = audio.onerror = () => {
+                URL.revokeObjectURL(audioUrl);
+                setGlow('idle'); S.speaking = false;
+                resolve();
+            };
+            audio.play().catch(() => { setGlow('idle'); S.speaking = false; resolve(); });
+        });
+
+    } catch {
+        // Fallback to browser TTS if OpenAI TTS fails
+        await fallbackSpeak(clean);
+        setGlow('idle'); S.speaking = false;
+    }
+}
+
+function fallbackSpeak(text) {
     return new Promise((resolve) => {
         if (!window.speechSynthesis) { resolve(); return; }
         window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text.replace(/\n/g,' '));
+        const u = new SpeechSynthesisUtterance(text);
         u.rate = 0.82; u.pitch = 0.92; u.volume = 0.95;
         const voices = window.speechSynthesis.getVoices();
         const pick = voices.find(v =>
             ['Samantha','Karen','Moira','Tessa'].some(n => v.name.includes(n))
         ) || voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB');
         if (pick) u.voice = pick;
-        setGlow('speaking'); S.speaking = true;
-        u.onend = u.onerror = () => { setGlow('idle'); S.speaking = false; resolve(); };
+        u.onend = u.onerror = resolve;
         window.speechSynthesis.speak(u);
     });
+}
+
+function base64ToBlob(base64, mimeType) {
+    const bytes  = atob(base64);
+    const buffer = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) buffer[i] = bytes.charCodeAt(i);
+    return new Blob([buffer], { type: mimeType });
 }
 
 // ════════════════════════════════════════════════════════
 // WHISPER
 // ════════════════════════════════════════════════════════
 async function transcribe(blob) {
-    setLabel('transcribing...');
+    setLabel('processing...');
 
     // File size gate: Netlify function body limit ~6MB, base64 adds ~33% overhead
     const MAX_BYTES = 4 * 1024 * 1024; // 4MB raw limit
