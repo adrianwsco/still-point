@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Still Point">
+    <meta name="theme-color" content="#080808">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <title>Still Point</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        :root {
+            --glow-idle:      radial-gradient(ellipse at 50% 120%, rgba(170,110,30,0.18) 0%, transparent 65%);
+            --glow-listening: radial-gradient(ellipse at 50% 110%, rgba(210,140,40,0.38) 0%, transparent 65%);
+            --glow-speaking:  radial-gradient(ellipse at 50% 120%, rgba(70,120,200,0.22) 0%, transparent 65%);
+            --glow-processing:radial-gradient(ellipse at 50% 120%, rgba(120,90,170,0.18) 0%, transparent 65%);
+            --text-primary:   rgba(225, 205, 175, 0.92);
+            --text-secondary: rgba(185, 160, 125, 0.65);
+            --text-dim:       rgba(140, 118, 88,  0.40);
+            --border-subtle:  rgba(180, 140, 70,  0.18);
+        }
+
+        html, body {
+            height: 100%; width: 100%;
+            overflow: hidden;
+            background: #080808;
+            font-family: 'Lora', Georgia, serif;
+            color: var(--text-primary);
+        }
+
+        body {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            position: relative;
+        }
+
+        /* ── Glow ── */
+        #glow {
+            position: fixed;
+            inset: 0;
+            background: var(--glow-idle);
+            transition: background 1.4s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+        #glow.listening  { background: var(--glow-listening); }
+        #glow.speaking   { background: var(--glow-speaking); }
+        #glow.processing { background: var(--glow-processing); }
+
+        /* ── Shen 神 (abstracted) ── */
+        #shen {
+            position: fixed;
+            bottom: -8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(55vw, 260px);
+            height: auto;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Layout ── */
+        #app {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 380px;
+            padding: 2.5rem 2rem;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 0;
+            text-align: center;
+        }
+
+        /* ── Login ── */
+        #login-screen {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 1.6rem; width: 100%;
+        }
+
+        .wordmark {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.9rem; font-weight: 300;
+            letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--text-primary);
+        }
+        .wordmark-sub {
+            font-family: 'Lora', serif; font-style: italic;
+            font-size: 0.78rem; letter-spacing: 0.12em;
+            color: var(--text-dim); margin-top: 0.4rem;
+        }
+
+        .field {
+            width: 100%; position: relative;
+        }
+        .field input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 0.85rem 1.1rem;
+            font-family: 'Lora', serif; font-size: 0.88rem;
+            border-radius: 3px; outline: none;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+        }
+        .field input:focus { border-color: rgba(180,140,70,0.45); }
+        .field input::placeholder { color: var(--text-dim); }
+
+        .btn-enter {
+            width: 100%;
+            padding: 0.85rem;
+            background: rgba(170,110,30,0.12);
+            border: 1px solid rgba(170,110,30,0.28);
+            color: var(--text-primary);
+            font-family: 'Lora', serif; font-size: 0.82rem;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            border-radius: 3px; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-enter:active { background: rgba(170,110,30,0.22); }
+
+        .login-error {
+            font-size: 0.75rem; color: rgba(200,80,70,0.75);
+            min-height: 1rem; text-align: center;
+        }
+
+        /* ── Main Screen ── */
+        #main-screen {
+            display: none; flex-direction: column;
+            align-items: center; gap: 0; width: 100%;
+        }
+
+        .label-state {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.72rem; letter-spacing: 0.35em;
+            text-transform: uppercase; color: var(--text-dim);
+            min-height: 1.1rem; margin-bottom: 2.5rem;
+            transition: opacity 0.4s;
+        }
+
+        .display-practice {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.22rem; font-weight: 300; font-style: italic;
+            line-height: 1.85; color: var(--text-primary);
+            min-height: 5rem; max-width: 300px;
+            margin-bottom: 1.8rem;
+            transition: opacity 0.7s;
+        }
+
+        .display-question {
+            font-family: 'Lora', serif; font-style: italic;
+            font-size: 0.94rem; line-height: 1.72;
+            color: var(--text-secondary);
+            min-height: 3.5rem; max-width: 290px;
+            margin-bottom: 2.8rem;
+            transition: opacity 0.5s;
+        }
+
+        /* ── Mic Button ── */
+        #mic-btn {
+            width: 68px; height: 68px; border-radius: 50%;
+            background: rgba(170,110,30,0.09);
+            border: 1px solid rgba(170,110,30,0.22);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.35s;
+            margin-bottom: 1.4rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #mic-btn.recording {
+            background: rgba(200,90,30,0.18);
+            border-color: rgba(210,110,40,0.5);
+            box-shadow: 0 0 28px rgba(200,90,30,0.12);
+        }
+        #mic-btn svg {
+            width: 26px; height: 26px;
+            fill: var(--text-secondary); transition: fill 0.3s;
+        }
+        #mic-btn.recording svg { fill: rgba(230,140,60,0.9); }
+
+        .label-hint {
+            font-size: 0.68rem; color: var(--text-dim);
+            letter-spacing: 0.18em; text-align: center;
+            min-height: 1rem; margin-bottom: 0.5rem;
+        }
+
+        .label-error {
+            font-size: 0.74rem; color: rgba(200,80,70,0.7);
+            text-align: center; min-height: 1rem;
+            max-width: 280px;
+        }
+
+        /* ── Logout ── */
+        #logout-btn {
+            position: fixed; top: 1.4rem; right: 1.4rem;
+            font-family: 'Lora', serif; font-size: 0.62rem;
+            letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--text-dim); background: none; border: none;
+            cursor: pointer; z-index: 10; display: none;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.6s ease forwards; }
+
+        /* ── Recording pulse ── */
+        @keyframes recordPulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+        #mic-btn.recording { animation: recordPulse 2s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+<div id="glow"></div>
+
+<!-- Shen 神 — structural skeleton, abstracted -->
+<svg id="shen" viewBox="0 0 240 270" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="rgba(205,158,62,1)" stroke-linecap="round" stroke-linejoin="round" opacity="0.046">
+    <!-- 示 radical (left component) -->
+    <line x1="18" y1="32" x2="82" y2="32" stroke-width="1.4"/>
+    <line x1="50" y1="32" x2="50" y2="95" stroke-width="1.4"/>
+    <line x1="50" y1="62" x2="16" y2="108" stroke-width="1.3"/>
+    <line x1="50" y1="62" x2="84" y2="108" stroke-width="1.3"/>
+    <line x1="28" y1="124" x2="22" y2="152" stroke-width="1.2"/>
+    <line x1="50" y1="122" x2="50" y2="152" stroke-width="1.2"/>
+    <line x1="72" y1="124" x2="78" y2="152" stroke-width="1.2"/>
+    <!-- 申 component (right) -->
+    <line x1="168" y1="18" x2="168" y2="256" stroke-width="1.4"/>
+    <line x1="118" y1="56" x2="218" y2="56" stroke-width="1.3"/>
+    <line x1="128" y1="88" x2="208" y2="88" stroke-width="1.3"/>
+    <line x1="128" y1="88" x2="128" y2="168" stroke-width="1.3"/>
+    <line x1="208" y1="88" x2="208" y2="168" stroke-width="1.3"/>
+    <line x1="118" y1="168" x2="218" y2="168" stroke-width="1.3"/>
+    <line x1="118" y1="210" x2="218" y2="210" stroke-width="1.3"/>
+  </g>
+</svg>
+
+<div id="app">
+
+    <!-- Login -->
+    <div id="login-screen">
+        <div>
+            <div class="wordmark">Still Point</div>
+            <div class="wordmark-sub">the still point of the turning world</div>
+        </div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:0.7rem">
+            <div class="field"><input id="email" type="email" placeholder="email" autocomplete="email"></div>
+            <div class="field"><input id="password" type="password" placeholder="password" autocomplete="current-password"></div>
+        </div>
+        <button class="btn-enter" onclick="handleLogin()">Enter</button>
+        <div class="login-error" id="login-error"></div>
+    </div>
+
+    <!-- Main -->
+    <div id="main-screen">
+        <div class="label-state" id="state-label">ready</div>
+        <div class="display-practice" id="practice-display"></div>
+        <div class="display-question" id="question-display"></div>
+        <div id="mic-btn" onclick="handleMicTap()">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        </div>
+        <div class="label-hint" id="hint-label">tap and tell me where you are</div>
+        <div class="label-error" id="error-label"></div>
+    </div>
+
+</div>
+
+<button id="logout-btn" onclick="handleLogout()">leave</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+// ════════════════════════════════════════════════════════
+// CONFIGURATION  —  Update these with your credentials
+// ════════════════════════════════════════════════════════
+const CONFIG = {
+    ANTHROPIC_API_KEY : 'YOUR_ANTHROPIC_API_KEY',
+    OPENAI_API_KEY    : 'YOUR_OPENAI_API_KEY',
+    SUPABASE_URL      : 'YOUR_SUPABASE_URL',
+    SUPABASE_ANON_KEY : 'YOUR_SUPABASE_ANON_KEY',
+};
+
+// ════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════
+const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+// ════════════════════════════════════════════════════════
+// THRESHOLD DEFINITIONS
+// ════════════════════════════════════════════════════════
+function getMealWindow() {
+    const h = new Date().getHours();
+    if (h >= 5  && h < 11) return 'morning';
+    if (h >= 11 && h < 15) return 'midday';
+    if (h >= 15 && h < 20) return 'evening';
+    return 'night';
+}
+
+const THRESHOLDS = {
+
+    morning: {
+        id: 'morning', label: 'Morning',
+        keywords: ['morning','wake','woke','waking','just woke','breakfast','post sleep','post-sleep','just woken'],
+        practiceText: "I am here.\nThe body arrived through the night.\nWhat is being given to me this morning?",
+        questions: [
+            "How did you arrive this morning — did you land gently, or was the mind already somewhere else before the body was ready?",
+            "What does the body feel like right now — not what you want it to feel like, what it actually feels like?",
+            "Is there anything from sleep worth noting — a dream, a waking, a quality of rest or unrest?",
+            "Did the early waking happen? If so, what was the mind doing in that window — was it useful, or was it spinning?"
+        ],
+        schema: {
+            threshold_type: 'morning',
+            waking_quality: null,
+            mind_state_on_waking: null,
+            body_sensation: null,
+            early_wake_occurred: null,
+            early_wake_quality: null,
+            dream_noted: null,
+            open_notes: null
+        }
+    },
+
+    meal: {
+        id: 'meal', label: 'Meal',
+        keywords: ['meal','ate','eating','food','lunch','dinner','breakfast','snack','just ate','after eating','post meal','post-meal','finished eating'],
+        practiceText: "This is medicine or this is noise —\nI choose which one it becomes.",
+        questions: [
+            "Did you eat with attention, or was food in service of something else?",
+            "Did your body receive it well — settled, energized, or something else?",
+            "How many protein portions — palm-sized servings — and how many carb portions — cupped hands?"
+        ],
+        deepDiveQuestions: [
+            "How did digestion feel — any bloating, heaviness, or did it move cleanly?",
+            "Did you feel genuinely hungry before eating, or were you eating by the clock or something else?",
+            "How was your body temperature around the meal — any coldness, sluggishness, or warmth?"
+        ],
+        schema: {
+            threshold_type: 'meal',
+            meal_time: null,
+            attention_quality: null,
+            body_reception: null,
+            protein_portions: null,
+            carb_portions: null,
+            digestion_quality: null,
+            hunger_before: null,
+            temperature_sensitivity: null,
+            open_notes: null
+        }
+    },
+
+    pre_training: {
+        id: 'pre_training', label: 'Pre-Training',
+        keywords: ['pre training','before training','before boxing','before lifting','about to train','heading to','going to boxing','going to lift','going to gym','pre workout','pre-training','pre-workout'],
+        practiceText: null,
+        boxingText: "I come to meet myself here.\nNot to defeat — to understand.\nWhat I resist in the bag, I resist in myself.\nWhat I move past in the bag, I move past in myself.",
+        liftingText: "I am not trying to prove anything here.\nI am asking what I am made of today —\nand I will respect the answer.",
+        generalText: "I bring what I have today, not what I wish I had.\nI leave behind the story of yesterday's session\nand last week's performance.\nThis is the only moment I can train in.",
+        questions: [
+            "How are you arriving today — what's present in the body right now?"
+        ],
+        schema: {
+            threshold_type: 'pre_training',
+            training_type: null,
+            arrival_state: null,
+            coaching_note: null,
+            open_notes: null
+        }
+    },
+
+    post_training: {
+        id: 'post_training', label: 'Post-Training',
+        keywords: ['post training','after training','after boxing','after lifting','just trained','just finished','done training','finished boxing','finished lifting','post workout','post-training','done with training'],
+        practiceText: "You've done the work.\nNow let the body speak.",
+        questions: [
+            "How did you arrive at the session — were you present in your body, or managing it from the outside?",
+            "What was the quality of the session — not the performance, the quality?",
+            "What does the body need now?",
+            "Is there anything technical worth noting for next time?",
+            "Did this session feel like it moved stagnant energy, or did it pull from reserves?"
+        ],
+        schema: {
+            threshold_type: 'post_training',
+            training_type: null,
+            arrival_quality: null,
+            session_quality: null,
+            session_type: null,
+            body_needs: null,
+            technical_notes: null,
+            qi_prana_movement: null,
+            open_notes: null
+        }
+    },
+
+    evening: {
+        id: 'evening', label: 'Evening',
+        keywords: ['evening','tonight','end of day','evening check','checking in','day check'],
+        practiceText: "What moved through you today\nthat is worth naming?",
+        questions: [
+            "What moved through you today that is worth remembering tomorrow?",
+            "Is there anything you are carrying that does not belong to tonight?",
+            "What was the dominant emotional tone today — did it stay stable or shift?",
+            "How did your energy move through the day — where were the peaks and the valleys?",
+            "Any sense of Liver Qi today — forward movement, or something blocked or frustrated?"
+        ],
+        schema: {
+            threshold_type: 'evening',
+            memorable_from_today: null,
+            carrying_tonight: null,
+            emotional_tone: null,
+            energy_pattern: null,
+            liver_qi: null,
+            open_notes: null
+        }
+    },
+
+    pre_bed: {
+        id: 'pre_bed', label: 'Pre-Bed',
+        keywords: ['bed','sleep','going to bed','pre bed','before sleep','bedtime','goodnight','heading to bed','pre-bed'],
+        practiceText: "I release what today asked of me.\nWhat is unfinished will wait.\nWhat is unresolved will find its time.\nI give my body back to itself now —\nto do the work I cannot do awake.",
+        invitationText: "Turn off your screens now. Let the day complete itself. Sleep is the other half of the practice. You don't need to earn this rest — it was always part of the work.",
+        questions: [
+            "What are you setting down from today?",
+            "Is the mind quiet, or is it still running?"
+        ],
+        schema: {
+            threshold_type: 'pre_bed',
+            mind_state: null,
+            setting_down: null,
+            open_notes: null
+        }
+    },
+
+    weekly: {
+        id: 'weekly', label: 'Weekly Sitting',
+        keywords: ['weekly','week','weekly sitting','weekly check','review the week','weekly review'],
+        practiceText: "Looking at this week as a whole —\nwhere was I most myself,\nand where was I performing?",
+        questions: [
+            "Looking at this week as a whole — where were you most yourself, and where were you performing?",
+            "What element felt dominant this week — Wood pressing forward, Fire burning bright, Water holding deep, Metal letting go, or Earth settling?",
+            "Where is the Vata right now — grounded and creative, or scattered and over-extended?",
+            "Where is the Pitta — burning clean, or burning through reserves?",
+            "What does the coming week need from you that this past week could not offer?",
+            "Where did your energy feel most aligned with your constitution, and where did you override it?",
+            "What was the quality of your digestion and appetite this week — any patterns worth noting?",
+            "Was there anything in your sleep this week that stood out — quality, early wakings, dreams?"
+        ],
+        schema: {
+            threshold_type: 'weekly',
+            is_supplemental: false,
+            most_authentic_moments: null,
+            performing_moments: null,
+            dominant_element: null,
+            vata_state: null,
+            pitta_state: null,
+            coming_week_needs: null,
+            energy_alignment: null,
+            digestion_patterns: null,
+            sleep_patterns: null,
+            open_notes: null
+        }
+    }
+};
+
+// ════════════════════════════════════════════════════════
+// SYSTEM PROMPT
+// ════════════════════════════════════════════════════════
+const SYSTEM_PROMPT = `You are the coaching presence inside a personal contemplative practice app called Still Point.
+
+The person is Adrian — a wellness practitioner, martial artist, and software developer. He is Vata-Pitta dominant (Vata primary), currently Rajas-dominant with accumulating Tamas. His TCM pattern is Wood-Fire dominant, Liver/Gallbladder primary.
+
+His known blind spot: he reads "wired" as "ready" and has a strong tendency to override recovery signals through rationalization. Challenge him when this pattern appears. His Shen (Heart spirit) is stable — the constant through all his cycling.
+
+Your role:
+- You are warm, honest, direct. Not clinical. Not a chatbot.
+- This is a voice interface — keep responses conversational and brief.
+- You hold Ayurvedic and TCM frameworks with genuine understanding. Explain your reasoning when you use them.
+- You challenge Adrian when he rationalizes instead of witnessing.
+- You never agree for the sake of agreement.
+- You leave interpretive space — you name patterns, you don't prescribe meaning.
+- He is building a practice, not submitting a report.
+
+When generating summaries: return ONLY valid JSON matching the schema provided. No markdown, no preamble, no explanation. Just the JSON object.`;
+
+// ════════════════════════════════════════════════════════
+// APP STATE
+// ════════════════════════════════════════════════════════
+let S = {
+    phase: 'idle',
+    threshold: null,
+    questions: [],
+    qIndex: 0,
+    conversation: [],
+    trainingType: null,
+    mealTime: null,
+    deepDive: false,
+    recorder: null,
+    audioChunks: [],
+    recognition: null,
+    speaking: false,
+    user: null,
+    nextTriggered: false,
+};
+
+// ════════════════════════════════════════════════════════
+// UI REFERENCES & HELPERS
+// ════════════════════════════════════════════════════════
+const $glow     = document.getElementById('glow');
+const $state    = document.getElementById('state-label');
+const $practice = document.getElementById('practice-display');
+const $question = document.getElementById('question-display');
+const $mic      = document.getElementById('mic-btn');
+const $hint     = document.getElementById('hint-label');
+const $error    = document.getElementById('error-label');
+
+const setGlow = (mode) => { $glow.className = mode || ''; };
+const setLabel = (t) => { $state.textContent = t; };
+const setHint  = (t) => { $hint.textContent = t; };
+const setPractice = (t) => { $practice.innerHTML = t ? t.replace(/\n/g,'<br>') : ''; };
+const setQuestion = (t) => { $question.innerHTML = t ? t.replace(/\n/g,'<br>') : ''; };
+
+function showError(msg, duration = 5000) {
+    $error.textContent = msg;
+    setTimeout(() => { $error.textContent = ''; }, duration);
+}
+
+function showMain() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-screen').style.display  = 'flex';
+    document.getElementById('logout-btn').style.display   = 'block';
+    setLabel('ready');
+    setHint('tap and tell me where you are');
+}
+
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
+async function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const pwd   = document.getElementById('password').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    if (!email || !pwd) { errEl.textContent = 'Email and password required.'; return; }
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+    if (error) { errEl.textContent = error.message; return; }
+    S.user = data.user;
+    showMain();
+}
+
+async function handleLogout() {
+    await sb.auth.signOut();
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('main-screen').style.display  = 'none';
+    document.getElementById('logout-btn').style.display   = 'none';
+    resetState();
+}
+
+async function initAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) { S.user = session.user; showMain(); }
+}
+
+// ════════════════════════════════════════════════════════
+// AUDIO RECORDING
+// ════════════════════════════════════════════════════════
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true }
+        });
+        S.audioChunks = [];
+        let mimeType = '';
+        for (const t of ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg']) {
+            if (MediaRecorder.isTypeSupported(t)) { mimeType = t; break; }
+        }
+        S.recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        S.recorder.ondataavailable = (e) => { if (e.data.size > 0) S.audioChunks.push(e.data); };
+        S.recorder.start(100);
+        $mic.classList.add('recording');
+        setGlow('listening');
+        return true;
+    } catch {
+        showError('Microphone access is required. Please allow and try again.');
+        return false;
+    }
+}
+
+function stopRecording() {
+    return new Promise((resolve) => {
+        if (!S.recorder || S.recorder.state === 'inactive') { resolve(null); return; }
+        S.recorder.onstop = () => {
+            const type = S.recorder.mimeType || 'audio/webm';
+            const blob = new Blob(S.audioChunks, { type });
+            S.recorder.stream.getTracks().forEach(t => t.stop());
+            $mic.classList.remove('recording');
+            setGlow('idle');
+            resolve(blob);
+        };
+        S.recorder.stop();
+    });
+}
+
+// ════════════════════════════════════════════════════════
+// SPEECH RECOGNITION — for "next" keyword detection
+// ════════════════════════════════════════════════════════
+function startRecognition(onNext) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    const r = new SR();
+    r.continuous = true; r.interimResults = true; r.lang = 'en-US';
+    r.onresult = (ev) => {
+        for (let i = ev.resultIndex; i < ev.results.length; i++) {
+            const t = ev.results[i][0].transcript.toLowerCase().trim();
+            if (t === 'next' || t.endsWith(' next') || t.endsWith('.next') || t === 'next.') {
+                onNext(); return;
+            }
+        }
+    };
+    r.onerror = () => {};
+    try { r.start(); S.recognition = r; } catch {}
+}
+
+function stopRecognition() {
+    if (S.recognition) { try { S.recognition.stop(); } catch {} S.recognition = null; }
+}
+
+// ════════════════════════════════════════════════════════
+// TTS
+// ════════════════════════════════════════════════════════
+function speak(text) {
+    return new Promise((resolve) => {
+        if (!window.speechSynthesis) { resolve(); return; }
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text.replace(/\n/g,' '));
+        u.rate = 0.82; u.pitch = 0.92; u.volume = 0.95;
+        const voices = window.speechSynthesis.getVoices();
+        const pick = voices.find(v =>
+            ['Samantha','Karen','Moira','Tessa'].some(n => v.name.includes(n))
+        ) || voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB');
+        if (pick) u.voice = pick;
+        setGlow('speaking'); S.speaking = true;
+        u.onend = u.onerror = () => { setGlow('idle'); S.speaking = false; resolve(); };
+        window.speechSynthesis.speak(u);
+    });
+}
+
+// ════════════════════════════════════════════════════════
+// WHISPER
+// ════════════════════════════════════════════════════════
+async function transcribe(blob) {
+    setLabel('transcribing...');
+    const form = new FormData();
+    let fname = 'audio.webm';
+    if (blob.type.includes('mp4')) fname = 'audio.mp4';
+    if (blob.type.includes('ogg')) fname = 'audio.ogg';
+    form.append('file', blob, fname);
+    form.append('model', 'whisper-1');
+    form.append('language', 'en');
+    try {
+        const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}` },
+            body: form
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const d = await res.json();
+        let t = (d.text || '').trim();
+        // Strip trailing "next" cue
+        t = t.replace(/[,.]?\s*\bnext\b\s*\.?\s*$/i, '').trim();
+        return t;
+    } catch (e) {
+        showError('Transcription failed. Please try again.');
+        return null;
+    }
+}
+
+// ════════════════════════════════════════════════════════
+// CLAUDE
+// ════════════════════════════════════════════════════════
+async function claude(messages, system) {
+    try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': CONFIG.ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true',
+            },
+            body: JSON.stringify({
+                model: 'claude-opus-4-6',
+                max_tokens: 1024,
+                system: system || SYSTEM_PROMPT,
+                messages
+            })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return (await res.json()).content[0].text;
+    } catch {
+        showError('API connection failed. Check your key and try again.');
+        return null;
+    }
+}
+
+async function detectThreshold(text) {
+    const lower = text.toLowerCase();
+    // Keyword matching first (faster, no API call needed)
+    for (const [key, t] of Object.entries(THRESHOLDS)) {
+        if (t.keywords.some(kw => lower.includes(kw))) return key;
+    }
+    // Claude fallback for ambiguous cases
+    const r = await claude([{ role:'user', content:`The user said: "${text}". Which threshold? Options: morning, meal, pre_training, post_training, evening, pre_bed, weekly. Reply with ONLY the key.` }]);
+    return (r && THRESHOLDS[r.trim()]) ? r.trim() : null;
+}
+
+function detectTrainingType(text) {
+    const l = text.toLowerCase();
+    if (l.includes('box') || l.includes('bag') || l.includes('spar')) return 'boxing';
+    if (l.includes('lift') || l.includes('weight') || l.includes('strength') || l.includes('gym')) return 'lifting';
+    return 'general';
+}
+
+async function getCoachingNote() {
+    try {
+        const { data } = await sb
+            .from('logs')
+            .select('summary, created_at')
+            .eq('user_id', S.user.id)
+            .eq('threshold_type', 'post_training')
+            .order('created_at', { ascending: false })
+            .limit(12);
+        if (!data || !data.length) return null;
+        const notes = data
+            .filter(l => l.summary?.technical_notes)
+            .map(l => `${l.created_at.split('T')[0]} (${l.summary.training_type || 'training'}): ${l.summary.technical_notes}`)
+            .join('\n');
+        if (!notes) return null;
+        const r = await claude([{ role:'user', content:`Recent training notes:\n${notes}\n\nAdrian is about to do ${S.trainingType || 'training'}. Identify the single most important coaching focus. One or two sentences, speak directly to him. If nothing specific: respond exactly NONE` }]);
+        return (!r || r.trim() === 'NONE') ? null : r.trim();
+    } catch { return null; }
+}
+
+async function generateSummary() {
+    const schema = JSON.parse(JSON.stringify(S.threshold.schema));
+    if (S.threshold.id === 'meal')         schema.meal_time = S.mealTime || getMealWindow();
+    if (S.threshold.id === 'pre_training') schema.training_type = S.trainingType;
+    if (S.threshold.id === 'post_training') schema.training_type = S.trainingType;
+    if (S.threshold.id === 'weekly')       schema.is_supplemental = new Date().getDay() !== 0;
+
+    const conv = S.conversation.map(m =>
+        `${m.role === 'user' ? 'Adrian' : 'Coach'}: ${m.content}`
+    ).join('\n');
+
+    const prompt = `Fill this JSON schema from the conversation. Extract and normalize values. Leave null for anything not discussed. Capture important context in open_notes.\n\nSchema:\n${JSON.stringify(schema,null,2)}\n\nConversation:\n${conv}\n\nReturn ONLY the completed JSON.`;
+
+    const r = await claude([{ role:'user', content: prompt }]);
+    if (!r) return null;
+    try {
+        return JSON.parse(r.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim());
+    } catch {
+        return { threshold_type: S.threshold.id, open_notes: r, parse_error: true };
+    }
+}
+
+// ════════════════════════════════════════════════════════
+// SUPABASE STORAGE
+// ════════════════════════════════════════════════════════
+async function saveLog(summary) {
+    const { error } = await sb.from('logs').insert({
+        user_id: S.user.id,
+        threshold_type: S.threshold.id,
+        meal_time: S.mealTime || null,
+        training_type: S.trainingType || null,
+        summary,
+        created_at: new Date().toISOString()
+    });
+    if (error) { showError('Save failed. Please try again.'); return false; }
+    return true;
+}
+
+// ════════════════════════════════════════════════════════
+// MAIN FLOW
+// ════════════════════════════════════════════════════════
+async function handleMicTap() {
+    // Tap while speaking = interrupt
+    if (S.speaking) {
+        window.speechSynthesis.cancel();
+        S.speaking = false; setGlow('idle');
+        return;
+    }
+
+    if (S.phase === 'idle') {
+        await beginSelection();
+    } else if (S.phase === 'listening') {
+        // Manual stop (fallback for "next" detection failure)
+        await processCurrentAnswer();
+    }
+}
+
+// ── Phase 1: Threshold Selection ──
+async function beginSelection() {
+    S.phase = 'selecting';
+    setLabel('listening');
+    setPractice(''); setQuestion('');
+    setHint('speak your threshold');
+
+    await speak("Tell me where you are.");
+
+    const started = await startRecording();
+    if (!started) { S.phase = 'idle'; resetUI(); return; }
+
+    setLabel('listening...');
+
+    // Listen for up to 8 seconds
+    await sleep(8000);
+
+    setLabel('processing...');
+    const blob = await stopRecording();
+    if (!blob) { resetState(); return; }
+
+    const text = await transcribe(blob);
+    if (!text) { resetState(); return; }
+
+    S.trainingType = detectTrainingType(text);
+    S.mealTime = getMealWindow();
+
+    const key = await detectThreshold(text);
+    if (!key) {
+        await speak("I didn't catch that. Try again — morning, meal, training, evening, or bedtime.");
+        resetState(); return;
+    }
+
+    S.threshold = THRESHOLDS[key];
+    S.conversation = [];
+    S.qIndex = 0;
+    S.deepDive = false;
+    S.nextTriggered = false;
+
+    await beginPractice();
+}
+
+// ── Phase 2: Practice Text ──
+async function beginPractice() {
+    S.phase = 'practicing';
+
+    let practiceText = S.threshold.practiceText;
+
+    if (S.threshold.id === 'pre_training') {
+        if (S.trainingType === 'boxing') practiceText = S.threshold.boxingText;
+        else if (S.trainingType === 'lifting') practiceText = S.threshold.liftingText;
+        else practiceText = S.threshold.generalText;
+    }
+
+    setLabel(S.threshold.label.toLowerCase());
+    setPractice(practiceText || '');
+    setQuestion('');
+    setHint('');
+
+    if (practiceText) await speak(practiceText);
+    await sleep(1800);
+
+    // Pre-bed: speak the invitation then go to questions
+    if (S.threshold.id === 'pre_bed') {
+        await speak(S.threshold.invitationText);
+        await sleep(1500);
+    }
+
+    // Pre-training: pull coaching note from logs
+    if (S.threshold.id === 'pre_training') {
+        setLabel('reviewing logs...');
+        const note = await getCoachingNote();
+        if (note) {
+            await speak(note);
+            // Store the coaching note for the summary
+            S.threshold.schema.coaching_note = note;
+            await sleep(1000);
+        }
+    }
+
+    S.questions = S.deepDive ? S.threshold.deepDiveQuestions : S.threshold.questions;
+    await beginQuestioning();
+}
+
+// ── Phase 3: Questions ──
+async function beginQuestioning() {
+    S.phase = 'questioning';
+    S.qIndex = 0;
+    await askQuestion();
+}
+
+async function askQuestion() {
+    if (S.qIndex >= S.questions.length) {
+        // Meal: offer deep dive
+        if (S.threshold.id === 'meal' && !S.deepDive && S.threshold.deepDiveQuestions) {
+            await speak("Is there anything about how the meal landed you'd like to explore further? Say 'go deeper', or 'done' to finish.");
+            setHint("say 'go deeper' or 'done'");
+            setLabel('listening...');
+
+            const started = await startRecording();
+            if (!started) { await finish(); return; }
+            await sleep(5000);
+            const blob = await stopRecording();
+            const t = await transcribe(blob);
+            if (t && t.toLowerCase().includes('deep')) {
+                S.deepDive = true;
+                S.questions = S.threshold.deepDiveQuestions;
+                S.qIndex = 0;
+                await askQuestion(); return;
+            }
+        }
+        await finish(); return;
+    }
+
+    const q = S.questions[S.qIndex];
+    setQuestion(q);
+    setLabel(`question ${S.qIndex + 1} of ${S.questions.length}`);
+    setHint("say 'next' when ready");
+
+    await speak(q);
+    await sleep(600);
+
+    await listenForAnswer();
+}
+
+// ── Answer Recording ──
+async function listenForAnswer() {
+    S.phase = 'listening';
+    S.nextTriggered = false;
+
+    const started = await startRecording();
+    if (!started) { await processCurrentAnswer(); return; }
+
+    setLabel('listening...');
+
+    // Start speech recognition to detect "next"
+    startRecognition(async () => {
+        if (!S.nextTriggered) {
+            S.nextTriggered = true;
+            await processCurrentAnswer();
+        }
+    });
+
+    // Safety timeout: 3 minutes max per answer
+    const timeout = setTimeout(async () => {
+        if (!S.nextTriggered) {
+            S.nextTriggered = true;
+            stopRecognition();
+            await processCurrentAnswer();
+        }
+    }, 180000);
+
+    // Poll for next triggered (from either speech recognition or tap)
+    await new Promise(resolve => {
+        const check = setInterval(() => {
+            if (S.nextTriggered) {
+                clearInterval(check); clearTimeout(timeout); resolve();
+            }
+        }, 300);
+    });
+}
+
+async function processCurrentAnswer() {
+    S.nextTriggered = true;
+    stopRecognition();
+    setLabel('processing...');
+    setGlow('processing');
+    $mic.classList.remove('recording');
+
+    const blob = await stopRecording();
+    if (blob) {
+        const text = await transcribe(blob);
+        if (text) {
+            S.conversation.push({ role: 'user', content: text, question: S.questions[S.qIndex] });
+        }
+    }
+
+    S.qIndex++;
+    S.phase = 'questioning';
+    S.nextTriggered = false;
+    await sleep(400);
+    await askQuestion();
+}
+
+// ── Phase 4: Complete ──
+async function finish() {
+    S.phase = 'summarizing';
+    setLabel('completing...');
+    setPractice(''); setQuestion('');
+    setHint('');
+
+    await speak("One moment.");
+    setGlow('processing');
+
+    const summary = await generateSummary();
+    if (summary) {
+        const saved = await saveLog(summary);
+        if (saved) {
+            S.phase = 'complete';
+            setGlow('idle');
+            setLabel('complete');
+            setPractice('✦');
+            setHint('tap to begin again');
+            await speak("Done. It is held.");
+            setTimeout(resetState, 3500);
+        } else { resetState(); }
+    } else { resetState(); }
+}
+
+// ════════════════════════════════════════════════════════
+// RESET
+// ════════════════════════════════════════════════════════
+function resetState() {
+    S.phase = 'idle'; S.threshold = null; S.questions = [];
+    S.qIndex = 0; S.conversation = []; S.trainingType = null;
+    S.mealTime = null; S.deepDive = false; S.nextTriggered = false;
+    stopRecognition();
+    $mic.classList.remove('recording');
+    resetUI();
+}
+
+function resetUI() {
+    setLabel('ready'); setPractice(''); setQuestion('');
+    setHint('tap and tell me where you are'); setGlow('idle');
+}
+
+// ════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Pre-load voices
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+
+// Init
+initAuth();
+
+</script>
+</body>
+</html>
