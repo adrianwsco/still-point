@@ -306,8 +306,8 @@
 const CONFIG = {
     // Anthropic and OpenAI keys live in Netlify environment variables — never here.
     // Supabase anon key is safe in the browser (security enforced via RLS).
-    SUPABASE_URL      : 'https://zfyxfetsfmncutbcnzfb.supabase.co',
-    SUPABASE_ANON_KEY : 'sb_publishable_L1R9hG3qzEVoa5B4zNAHEg_M2n1BUoG',
+    SUPABASE_URL      : 'YOUR_SUPABASE_URL',
+    SUPABASE_ANON_KEY : 'YOUR_SUPABASE_ANON_KEY',
 };
 
 // ════════════════════════════════════════════════════════
@@ -935,8 +935,7 @@ async function beginSelection() {
     setPractice(''); setQuestion('');
     setHint('speak your threshold');
 
-    await speak("Tell me where you are.");
-
+    // No auto-prompt — app is silent until user speaks
     const started = await startRecording();
     if (!started) { S.phase = 'idle'; resetUI(); return; }
 
