@@ -22,14 +22,14 @@
         }
 
         :root {
-            --glow-idle:      radial-gradient(ellipse at 50% 120%, rgba(170,110,30,0.18) 0%, transparent 65%);
-            --glow-listening: radial-gradient(ellipse at 50% 110%, rgba(210,140,40,0.38) 0%, transparent 65%);
-            --glow-speaking:  radial-gradient(ellipse at 50% 120%, rgba(70,120,200,0.22) 0%, transparent 65%);
-            --glow-processing:radial-gradient(ellipse at 50% 120%, rgba(120,90,170,0.18) 0%, transparent 65%);
-            --text-primary:   rgba(225, 205, 175, 0.92);
-            --text-secondary: rgba(185, 160, 125, 0.65);
-            --text-dim:       rgba(140, 118, 88,  0.40);
-            --border-subtle:  rgba(180, 140, 70,  0.18);
+            --glow-idle:       radial-gradient(ellipse at 50% 120%, rgba(170,110,30,0.18) 0%, transparent 65%);
+            --glow-listening:  radial-gradient(ellipse at 50% 110%, rgba(210,140,40,0.38) 0%, transparent 65%);
+            --glow-speaking:   radial-gradient(ellipse at 50% 120%, rgba(70,120,200,0.22) 0%, transparent 65%);
+            --glow-processing: radial-gradient(ellipse at 50% 110%, rgba(70,150,230,0.46) 0%, transparent 65%);
+            --text-primary:    rgba(225, 205, 175, 0.92);
+            --text-secondary:  rgba(185, 160, 125, 0.65);
+            --text-dim:        rgba(140, 118, 88,  0.40);
+            --border-subtle:   rgba(180, 140, 70,  0.18);
         }
 
         html, body {
@@ -50,12 +50,10 @@
 
         /* ── Glow ── */
         #glow {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: var(--glow-idle);
             transition: background 1.4s ease;
-            pointer-events: none;
-            z-index: 0;
+            pointer-events: none; z-index: 0;
         }
         #glow.listening  { background: var(--glow-listening); }
         #glow.speaking   { background: var(--glow-speaking); }
@@ -63,14 +61,10 @@
 
         /* ── Shen 神 (abstracted) ── */
         #shen {
-            position: fixed;
-            bottom: -8%;
-            left: 50%;
+            position: fixed; bottom: -8%; left: 50%;
             transform: translateX(-50%);
-            width: min(55vw, 260px);
-            height: auto;
-            pointer-events: none;
-            z-index: 0;
+            width: min(55vw, 260px); height: auto;
+            pointer-events: none; z-index: 0;
         }
 
         /* ── Layout ── */
@@ -101,9 +95,7 @@
             color: var(--text-dim); margin-top: 0.4rem;
         }
 
-        .field {
-            width: 100%; position: relative;
-        }
+        .field { width: 100%; position: relative; }
         .field input {
             width: 100%;
             background: rgba(255,255,255,0.03);
@@ -119,8 +111,7 @@
         .field input::placeholder { color: var(--text-dim); }
 
         .btn-enter {
-            width: 100%;
-            padding: 0.85rem;
+            width: 100%; padding: 0.85rem;
             background: rgba(170,110,30,0.12);
             border: 1px solid rgba(170,110,30,0.28);
             color: var(--text-primary);
@@ -144,7 +135,7 @@
 
         .label-state {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 0.72rem; letter-spacing: 0.35em;
+            font-size: 0.87rem; letter-spacing: 0.35em;
             text-transform: uppercase; color: var(--text-dim);
             min-height: 1.1rem; margin-bottom: 2.5rem;
             transition: opacity 0.4s;
@@ -152,7 +143,7 @@
 
         .display-practice {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 1.22rem; font-weight: 300; font-style: italic;
+            font-size: 1.37rem; font-weight: 300; font-style: italic;
             line-height: 1.85; color: var(--text-primary);
             min-height: 5rem; max-width: 300px;
             margin-bottom: 1.8rem;
@@ -161,7 +152,7 @@
 
         .display-question {
             font-family: 'Lora', serif; font-style: italic;
-            font-size: 0.94rem; line-height: 1.72;
+            font-size: 1.09rem; line-height: 1.72;
             color: var(--text-secondary);
             min-height: 3.5rem; max-width: 290px;
             margin-bottom: 2.8rem;
@@ -170,7 +161,7 @@
 
         /* ── Mic Button ── */
         #mic-btn {
-            width: 68px; height: 68px; border-radius: 50%;
+            width: 136px; height: 136px; border-radius: 50%;
             background: rgba(170,110,30,0.09);
             border: 1px solid rgba(170,110,30,0.22);
             display: flex; align-items: center; justify-content: center;
@@ -181,22 +172,27 @@
         #mic-btn.recording {
             background: rgba(200,90,30,0.18);
             border-color: rgba(210,110,40,0.5);
-            box-shadow: 0 0 28px rgba(200,90,30,0.12);
+            box-shadow: 0 0 48px rgba(200,90,30,0.16);
+        }
+        /* System is speaking or processing — not user's turn */
+        #mic-btn.system-busy {
+            opacity: 0.28;
+            pointer-events: none;
         }
         #mic-btn svg {
-            width: 26px; height: 26px;
+            width: 52px; height: 52px;
             fill: var(--text-secondary); transition: fill 0.3s;
         }
         #mic-btn.recording svg { fill: rgba(230,140,60,0.9); }
 
         .label-hint {
-            font-size: 0.68rem; color: var(--text-dim);
+            font-size: 0.83rem; color: var(--text-dim);
             letter-spacing: 0.18em; text-align: center;
             min-height: 1rem; margin-bottom: 0.5rem;
         }
 
         .label-error {
-            font-size: 0.74rem; color: rgba(200,80,70,0.7);
+            font-size: 0.89rem; color: rgba(200,80,70,0.7);
             text-align: center; min-height: 1rem;
             max-width: 280px;
         }
@@ -204,7 +200,7 @@
         /* ── Logout ── */
         #logout-btn {
             position: fixed; top: 1.4rem; right: 1.4rem;
-            font-family: 'Lora', serif; font-size: 0.62rem;
+            font-family: 'Lora', serif; font-size: 0.77rem;
             letter-spacing: 0.18em; text-transform: uppercase;
             color: var(--text-dim); background: none; border: none;
             cursor: pointer; z-index: 10; display: none;
@@ -217,7 +213,6 @@
         }
         .fade-up { animation: fadeUp 0.6s ease forwards; }
 
-        /* ── Recording pulse ── */
         @keyframes recordPulse {
             0%, 100% { opacity: 1; }
             50%       { opacity: 0.4; }
@@ -232,20 +227,18 @@
 <!-- Shen 神 — structural skeleton, abstracted -->
 <svg id="shen" viewBox="0 0 240 270" fill="none" xmlns="http://www.w3.org/2000/svg">
   <g stroke="rgba(205,158,62,1)" stroke-linecap="round" stroke-linejoin="round" opacity="0.046">
-    <!-- 示 radical (left component) -->
-    <line x1="18" y1="32" x2="82" y2="32" stroke-width="1.4"/>
-    <line x1="50" y1="32" x2="50" y2="95" stroke-width="1.4"/>
-    <line x1="50" y1="62" x2="16" y2="108" stroke-width="1.3"/>
-    <line x1="50" y1="62" x2="84" y2="108" stroke-width="1.3"/>
-    <line x1="28" y1="124" x2="22" y2="152" stroke-width="1.2"/>
-    <line x1="50" y1="122" x2="50" y2="152" stroke-width="1.2"/>
-    <line x1="72" y1="124" x2="78" y2="152" stroke-width="1.2"/>
-    <!-- 申 component (right) -->
-    <line x1="168" y1="18" x2="168" y2="256" stroke-width="1.4"/>
-    <line x1="118" y1="56" x2="218" y2="56" stroke-width="1.3"/>
-    <line x1="128" y1="88" x2="208" y2="88" stroke-width="1.3"/>
-    <line x1="128" y1="88" x2="128" y2="168" stroke-width="1.3"/>
-    <line x1="208" y1="88" x2="208" y2="168" stroke-width="1.3"/>
+    <line x1="18"  y1="32"  x2="82"  y2="32"  stroke-width="1.4"/>
+    <line x1="50"  y1="32"  x2="50"  y2="95"  stroke-width="1.4"/>
+    <line x1="50"  y1="62"  x2="16"  y2="108" stroke-width="1.3"/>
+    <line x1="50"  y1="62"  x2="84"  y2="108" stroke-width="1.3"/>
+    <line x1="28"  y1="124" x2="22"  y2="152" stroke-width="1.2"/>
+    <line x1="50"  y1="122" x2="50"  y2="152" stroke-width="1.2"/>
+    <line x1="72"  y1="124" x2="78"  y2="152" stroke-width="1.2"/>
+    <line x1="168" y1="18"  x2="168" y2="256" stroke-width="1.4"/>
+    <line x1="118" y1="56"  x2="218" y2="56"  stroke-width="1.3"/>
+    <line x1="128" y1="88"  x2="208" y2="88"  stroke-width="1.3"/>
+    <line x1="128" y1="88"  x2="128" y2="168" stroke-width="1.3"/>
+    <line x1="208" y1="88"  x2="208" y2="168" stroke-width="1.3"/>
     <line x1="118" y1="168" x2="218" y2="168" stroke-width="1.3"/>
     <line x1="118" y1="210" x2="218" y2="210" stroke-width="1.3"/>
   </g>
@@ -298,14 +291,13 @@
 <button id="logout-btn" onclick="handleLogout()">leave</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 
 // ════════════════════════════════════════════════════════
-// CONFIGURATION  —  Update these with your credentials
+// CONFIGURATION
 // ════════════════════════════════════════════════════════
 const CONFIG = {
-    // Anthropic and OpenAI keys live in Netlify environment variables — never here.
-    // Supabase anon key is safe in the browser (security enforced via RLS).
     SUPABASE_URL      : 'https://zfyxfetsfmncutbcnzfb.supabase.co',
     SUPABASE_ANON_KEY : 'sb_publishable_L1R9hG3qzEVoa5B4zNAHEg_M2n1BUoG',
 };
@@ -340,13 +332,9 @@ const THRESHOLDS = {
         ],
         schema: {
             threshold_type: 'morning',
-            waking_quality: null,
-            mind_state_on_waking: null,
-            body_sensation: null,
-            early_wake_occurred: null,
-            early_wake_quality: null,
-            dream_noted: null,
-            open_notes: null
+            waking_quality: null, mind_state_on_waking: null,
+            body_sensation: null, early_wake_occurred: null,
+            early_wake_quality: null, dream_noted: null, open_notes: null
         }
     },
 
@@ -366,15 +354,9 @@ const THRESHOLDS = {
         ],
         schema: {
             threshold_type: 'meal',
-            meal_time: null,
-            attention_quality: null,
-            body_reception: null,
-            protein_portions: null,
-            carb_portions: null,
-            digestion_quality: null,
-            hunger_before: null,
-            temperature_sensitivity: null,
-            open_notes: null
+            meal_time: null, attention_quality: null, body_reception: null,
+            protein_portions: null, carb_portions: null, digestion_quality: null,
+            hunger_before: null, temperature_sensitivity: null, open_notes: null
         }
     },
 
@@ -382,7 +364,7 @@ const THRESHOLDS = {
         id: 'pre_training', label: 'Pre-Training',
         keywords: ['pre training','before training','before boxing','before lifting','about to train','heading to','going to boxing','going to lift','going to gym','pre workout','pre-training','pre-workout'],
         practiceText: null,
-        boxingText: "I come to meet myself here.\nNot to defeat — to understand.\nWhat I resist in the bag, I resist in myself.\nWhat I move past in the bag, I move past in myself.",
+        boxingText:  "I come to meet myself here.\nNot to defeat — to understand.\nWhat I resist in the bag, I resist in myself.\nWhat I move past in the bag, I move past in myself.",
         liftingText: "I am not trying to prove anything here.\nI am asking what I am made of today —\nand I will respect the answer.",
         generalText: "I bring what I have today, not what I wish I had.\nI leave behind the story of yesterday's session\nand last week's performance.\nThis is the only moment I can train in.",
         questions: [
@@ -390,10 +372,8 @@ const THRESHOLDS = {
         ],
         schema: {
             threshold_type: 'pre_training',
-            training_type: null,
-            arrival_state: null,
-            coaching_note: null,
-            open_notes: null
+            training_type: null, arrival_state: null,
+            coaching_note: null, open_notes: null
         }
     },
 
@@ -410,14 +390,9 @@ const THRESHOLDS = {
         ],
         schema: {
             threshold_type: 'post_training',
-            training_type: null,
-            arrival_quality: null,
-            session_quality: null,
-            session_type: null,
-            body_needs: null,
-            technical_notes: null,
-            qi_prana_movement: null,
-            open_notes: null
+            training_type: null, arrival_quality: null, session_quality: null,
+            session_type: null, body_needs: null, technical_notes: null,
+            qi_prana_movement: null, open_notes: null
         }
     },
 
@@ -434,12 +409,9 @@ const THRESHOLDS = {
         ],
         schema: {
             threshold_type: 'evening',
-            memorable_from_today: null,
-            carrying_tonight: null,
-            emotional_tone: null,
-            energy_pattern: null,
-            liver_qi: null,
-            open_notes: null
+            memorable_from_today: null, carrying_tonight: null,
+            emotional_tone: null, energy_pattern: null,
+            liver_qi: null, open_notes: null
         }
     },
 
@@ -454,9 +426,7 @@ const THRESHOLDS = {
         ],
         schema: {
             threshold_type: 'pre_bed',
-            mind_state: null,
-            setting_down: null,
-            open_notes: null
+            mind_state: null, setting_down: null, open_notes: null
         }
     },
 
@@ -477,24 +447,22 @@ const THRESHOLDS = {
         schema: {
             threshold_type: 'weekly',
             is_supplemental: false,
-            most_authentic_moments: null,
-            performing_moments: null,
-            dominant_element: null,
-            vata_state: null,
-            pitta_state: null,
-            coming_week_needs: null,
-            energy_alignment: null,
-            digestion_patterns: null,
-            sleep_patterns: null,
-            open_notes: null
+            most_authentic_moments: null, performing_moments: null,
+            dominant_element: null, vata_state: null, pitta_state: null,
+            coming_week_needs: null, energy_alignment: null,
+            digestion_patterns: null, sleep_patterns: null, open_notes: null
         }
     }
 };
 
 // ════════════════════════════════════════════════════════
 // SYSTEM PROMPT
+// BASE_SYSTEM_PROMPT is the fixed foundation.
+// buildSystemPrompt() appends the user's calibration
+// settings at session start and stores the result in
+// S.systemPrompt for the duration of the session.
 // ════════════════════════════════════════════════════════
-const SYSTEM_PROMPT = `You are the coaching presence inside a personal contemplative practice app called Still Point.
+const BASE_SYSTEM_PROMPT = `You are the coaching presence inside a personal contemplative practice app called Still Point.
 
 The person is Adrian — a wellness practitioner, martial artist, and software developer. He is Vata-Pitta dominant (Vata primary), currently Rajas-dominant with accumulating Tamas. His TCM pattern is Wood-Fire dominant, Liver/Gallbladder primary.
 
@@ -510,6 +478,20 @@ Your role:
 - He is building a practice, not submitting a report.
 
 When generating summaries: return ONLY valid JSON matching the schema provided. No markdown, no preamble, no explanation. Just the JSON object.`;
+
+function buildSystemPrompt(settings) {
+    return `${BASE_SYSTEM_PROMPT}
+
+Coaching calibration for this session:
+- Tone: ${settings.tone || 'warm and direct'}
+- Firmness: ${settings.firmness || 'medium'}
+- Verbosity: ${settings.verbosity || 'concise'}
+- Challenge rationalizing: ${settings.challenge_rationalizing || 'yes'}
+- Framework emphasis: ${settings.framework_emphasis || 'balanced'}
+- Language style: ${settings.language_style || 'conversational'}
+
+Apply these parameters consistently across all questions and responses in this session.`;
+}
 
 // ════════════════════════════════════════════════════════
 // APP STATE
@@ -529,6 +511,10 @@ let S = {
     speaking: false,
     user: null,
     nextTriggered: false,
+    // Phase 2A additions
+    settings: {},
+    customPrompts: {},
+    systemPrompt: '',
 };
 
 // ════════════════════════════════════════════════════════
@@ -542,28 +528,69 @@ const $mic      = document.getElementById('mic-btn');
 const $hint     = document.getElementById('hint-label');
 const $error    = document.getElementById('error-label');
 
-const setGlow = (mode) => { $glow.className = mode || ''; };
-const setLabel = (t) => { $state.textContent = t; };
-const setHint  = (t) => { $hint.textContent = t; };
-const setPractice = (t) => { $practice.innerHTML = t ? t.replace(/\n/g,'<br>') : ''; };
-const setQuestion = (t) => { $question.innerHTML = t ? t.replace(/\n/g,'<br>') : ''; };
+const setGlow     = (mode) => {
+    $glow.className = mode || '';
+    // Mic fades when system is speaking or processing — not the user's turn
+    if (mode === 'speaking' || mode === 'processing') {
+        $mic.classList.add('system-busy');
+    } else {
+        $mic.classList.remove('system-busy');
+    }
+};
+const setLabel    = (t)    => { $state.textContent = t; };
+const setHint     = (t)    => { $hint.textContent = t; };
+const setPractice = (t)    => { $practice.innerHTML = t ? t.replace(/\n/g,'<br>') : ''; };
+const setQuestion = (t)    => { $question.innerHTML = t ? t.replace(/\n/g,'<br>') : ''; };
 
 function showError(msg, duration = 5000) {
     $error.textContent = msg;
     setTimeout(() => { $error.textContent = ''; }, duration);
 }
 
-function showMain() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-screen').style.display  = 'flex';
-    document.getElementById('logout-btn').style.display   = 'block';
-    setLabel('ready');
-    setHint('tap and tell me where you are');
+// ════════════════════════════════════════════════════════
+// SETTINGS & PROMPTS — loaded once per session on login
+// ════════════════════════════════════════════════════════
+async function loadSettings() {
+    if (!S.user) return {};
+    try {
+        const { data } = await sb.from('settings')
+            .select('key, value')
+            .eq('user_id', S.user.id);
+        const s = {};
+        (data || []).forEach(row => s[row.key] = row.value);
+        return s;
+    } catch { return {}; }
+}
+
+async function loadPrompts() {
+    if (!S.user) return {};
+    try {
+        const { data } = await sb.from('prompts')
+            .select('prompt_key, practice_text')
+            .eq('user_id', S.user.id);
+        const p = {};
+        (data || []).forEach(row => {
+            if (row.practice_text) p[row.prompt_key] = row.practice_text;
+        });
+        return p;
+    } catch { return {}; }
 }
 
 // ════════════════════════════════════════════════════════
 // AUTH
 // ════════════════════════════════════════════════════════
+async function showMain() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-screen').style.display  = 'flex';
+    document.getElementById('logout-btn').style.display   = 'block';
+    setLabel('ready');
+    setHint('tap and tell me where you are');
+    // Load user settings and custom prompts; build session system prompt
+    S.settings      = await loadSettings();
+    S.customPrompts = await loadPrompts();
+    S.systemPrompt  = buildSystemPrompt(S.settings);
+}
+
 async function handleLogin() {
     const email = document.getElementById('email').value.trim();
     const pwd   = document.getElementById('password').value;
@@ -573,7 +600,7 @@ async function handleLogin() {
     const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
     if (error) { errEl.textContent = error.message; return; }
     S.user = data.user;
-    showMain();
+    await showMain();
 }
 
 async function handleLogout() {
@@ -585,16 +612,14 @@ async function handleLogout() {
 }
 
 async function initAuth() {
-    // Detect password recovery or invite token in URL hash (best practice pattern)
     const params = new URLSearchParams(window.location.hash.replace('#', '?'));
     const type = params.get('type');
     if (type === 'recovery' || type === 'invite') {
         const { data: { session } } = await sb.auth.getSession();
         if (session) { showSetPassword(); return; }
     }
-    // Normal session check
     const { data: { session } } = await sb.auth.getSession();
-    if (session) { S.user = session.user; showMain(); }
+    if (session) { S.user = session.user; await showMain(); }
 }
 
 async function showSetPassword() {
@@ -614,7 +639,7 @@ async function handleSetPassword() {
     S.user = data.user;
     window.history.replaceState(null, '', window.location.pathname);
     document.getElementById('set-pwd-screen').style.display = 'none';
-    showMain();
+    await showMain();
 }
 
 // ════════════════════════════════════════════════════════
@@ -658,7 +683,7 @@ function stopRecording() {
 }
 
 // ════════════════════════════════════════════════════════
-// SPEECH RECOGNITION — for "next" keyword detection
+// SPEECH RECOGNITION — "next" keyword detection
 // ════════════════════════════════════════════════════════
 function startRecognition(onNext) {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -713,9 +738,8 @@ async function speak(text) {
             audio.play().catch(() => { setGlow('idle'); S.speaking = false; resolve(); });
         });
 
-    } catch (err) {
-        // Temporary: surface error so we can diagnose
-        showError('TTS error: ' + (err && err.message ? err.message : String(err)));
+    } catch {
+        // Fallback to browser TTS if OpenAI TTS fails
         await fallbackSpeak(clean);
         setGlow('idle'); S.speaking = false;
     }
@@ -749,18 +773,14 @@ function base64ToBlob(base64, mimeType) {
 // ════════════════════════════════════════════════════════
 async function transcribe(blob) {
     setLabel('processing...');
-
-    // File size gate: Netlify function body limit ~6MB, base64 adds ~33% overhead
-    const MAX_BYTES = 4 * 1024 * 1024; // 4MB raw limit
+    const MAX_BYTES = 4 * 1024 * 1024;
     if (blob.size > MAX_BYTES) {
         showError('Recording too long. Please keep answers under a few minutes.');
         return null;
     }
-
     let fname = 'audio.webm';
     if (blob.type.includes('mp4')) fname = 'audio.mp4';
     if (blob.type.includes('ogg')) fname = 'audio.ogg';
-
     try {
         const audioBase64 = await blobToBase64(blob);
         const res = await fetch('/.netlify/functions/whisper', {
@@ -791,6 +811,9 @@ function blobToBase64(blob) {
 
 // ════════════════════════════════════════════════════════
 // CLAUDE
+// Uses S.systemPrompt (built from user settings at session
+// start) unless a specific system string is passed.
+// Falls back to BASE_SYSTEM_PROMPT if settings failed to load.
 // ════════════════════════════════════════════════════════
 async function claude(messages, system, _attempt = 0) {
     const MAX_RETRIES = 6;
@@ -798,10 +821,12 @@ async function claude(messages, system, _attempt = 0) {
         const res = await fetch('/.netlify/functions/claude', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages, system: system || SYSTEM_PROMPT })
+            body: JSON.stringify({
+                messages,
+                system: system || S.systemPrompt || BASE_SYSTEM_PROMPT
+            })
         });
 
-        // 529/503 — overloaded, retry with exponential backoff
         if ((res.status === 529 || res.status === 503) && _attempt < MAX_RETRIES) {
             const waitMs  = Math.min(Math.pow(2, _attempt) * 1000, 30000);
             const waitSec = Math.round(waitMs / 1000);
@@ -810,18 +835,14 @@ async function claude(messages, system, _attempt = 0) {
             return claude(messages, system, _attempt + 1);
         }
 
-        // 401 — bad key, permanent, don't retry
         if (res.status === 401) {
             showError('API key error. Check ANTHROPIC_API_KEY in Netlify environment variables.');
             return null;
         }
-
-        // 400 — bad request, don't retry
         if (res.status === 400) {
             showError('Request error. Please try again.');
             return null;
         }
-
         if (!res.ok) throw new Error(await res.text());
 
         const data = await res.json();
@@ -835,11 +856,9 @@ async function claude(messages, system, _attempt = 0) {
 
 async function detectThreshold(text) {
     const lower = text.toLowerCase();
-    // Keyword matching first (faster, no API call needed)
     for (const [key, t] of Object.entries(THRESHOLDS)) {
         if (t.keywords.some(kw => lower.includes(kw))) return key;
     }
-    // Claude fallback for ambiguous cases
     const r = await claude([{ role:'user', content:`The user said: "${text}". Which threshold? Options: morning, meal, pre_training, post_training, evening, pre_bed, weekly. Reply with ONLY the key.` }]);
     return (r && THRESHOLDS[r.trim()]) ? r.trim() : null;
 }
@@ -873,10 +892,10 @@ async function getCoachingNote() {
 
 async function generateSummary() {
     const schema = JSON.parse(JSON.stringify(S.threshold.schema));
-    if (S.threshold.id === 'meal')         schema.meal_time = S.mealTime || getMealWindow();
-    if (S.threshold.id === 'pre_training') schema.training_type = S.trainingType;
+    if (S.threshold.id === 'meal')          schema.meal_time     = S.mealTime || getMealWindow();
+    if (S.threshold.id === 'pre_training')  schema.training_type = S.trainingType;
     if (S.threshold.id === 'post_training') schema.training_type = S.trainingType;
-    if (S.threshold.id === 'weekly')       schema.is_supplemental = new Date().getDay() !== 0;
+    if (S.threshold.id === 'weekly')        schema.is_supplemental = new Date().getDay() !== 0;
 
     const conv = S.conversation.map(m =>
         `${m.role === 'user' ? 'Adrian' : 'Coach'}: ${m.content}`
@@ -898,12 +917,12 @@ async function generateSummary() {
 // ════════════════════════════════════════════════════════
 async function saveLog(summary) {
     const { error } = await sb.from('logs').insert({
-        user_id: S.user.id,
+        user_id:        S.user.id,
         threshold_type: S.threshold.id,
-        meal_time: S.mealTime || null,
-        training_type: S.trainingType || null,
+        meal_time:      S.mealTime || null,
+        training_type:  S.trainingType || null,
         summary,
-        created_at: new Date().toISOString()
+        created_at:     new Date().toISOString()
     });
     if (error) { showError('Save failed. Please try again.'); return false; }
     return true;
@@ -913,22 +932,14 @@ async function saveLog(summary) {
 // MAIN FLOW
 // ════════════════════════════════════════════════════════
 async function handleMicTap() {
-    // Tap while speaking = interrupt
     if (S.speaking) {
         window.speechSynthesis.cancel();
         S.speaking = false; setGlow('idle');
         return;
     }
-
-    if (S.phase === 'idle') {
-        await beginSelection();
-    } else if (S.phase === 'selecting') {
-        // User taps again to stop threshold recording and process
-        await processThresholdSelection();
-    } else if (S.phase === 'listening') {
-        // Manual stop (fallback for "next" detection failure)
-        await processCurrentAnswer();
-    }
+    if (S.phase === 'idle')        { await beginSelection(); }
+    else if (S.phase === 'selecting') { await processThresholdSelection(); }
+    else if (S.phase === 'listening') { await processCurrentAnswer(); }
 }
 
 // ── Phase 1: Threshold Selection ──
@@ -937,26 +948,21 @@ async function beginSelection() {
     setLabel('listening');
     setPractice(''); setQuestion('');
     setHint('speak your threshold');
-
-    // Start recording — app waits silently for user to tap again to stop
     const started = await startRecording();
     if (!started) { S.phase = 'idle'; resetUI(); return; }
-
     setLabel('listening...');
     setHint('tap again when done');
-    // Flow continues in processThresholdSelection() when user taps mic
 }
 
 async function processThresholdSelection() {
     setLabel('processing...');
     const blob = await stopRecording();
     if (!blob) { resetState(); return; }
-
     const text = await transcribe(blob);
     if (!text) { resetState(); return; }
 
     S.trainingType = detectTrainingType(text);
-    S.mealTime = getMealWindow();
+    S.mealTime     = getMealWindow();
 
     const key = await detectThreshold(text);
     if (!key) {
@@ -964,11 +970,11 @@ async function processThresholdSelection() {
         resetState(); return;
     }
 
-    S.threshold = THRESHOLDS[key];
-    S.conversation = [];
-    S.qIndex = 0;
-    S.deepDive = false;
-    S.nextTriggered = false;
+    S.threshold      = THRESHOLDS[key];
+    S.conversation   = [];
+    S.qIndex         = 0;
+    S.deepDive       = false;
+    S.nextTriggered  = false;
 
     await beginPractice();
 }
@@ -977,13 +983,19 @@ async function processThresholdSelection() {
 async function beginPractice() {
     S.phase = 'practicing';
 
+    // Start from the hardcoded THRESHOLDS default
     let practiceText = S.threshold.practiceText;
-
     if (S.threshold.id === 'pre_training') {
-        if (S.trainingType === 'boxing') practiceText = S.threshold.boxingText;
+        if (S.trainingType === 'boxing')       practiceText = S.threshold.boxingText;
         else if (S.trainingType === 'lifting') practiceText = S.threshold.liftingText;
-        else practiceText = S.threshold.generalText;
+        else                                   practiceText = S.threshold.generalText;
     }
+
+    // Override with user-edited custom prompt if one is saved in Supabase
+    const promptKey = S.threshold.id === 'pre_training'
+        ? `pre_training_${S.trainingType || 'general'}`
+        : S.threshold.id;
+    if (S.customPrompts[promptKey]) practiceText = S.customPrompts[promptKey];
 
     setLabel(S.threshold.label.toLowerCase());
     setPractice(practiceText || '');
@@ -993,19 +1005,16 @@ async function beginPractice() {
     if (practiceText) await speak(practiceText);
     await sleep(1800);
 
-    // Pre-bed: speak the invitation then go to questions
     if (S.threshold.id === 'pre_bed') {
         await speak(S.threshold.invitationText);
         await sleep(1500);
     }
 
-    // Pre-training: pull coaching note from logs
     if (S.threshold.id === 'pre_training') {
         setLabel('reviewing logs...');
         const note = await getCoachingNote();
         if (note) {
             await speak(note);
-            // Store the coaching note for the summary
             S.threshold.schema.coaching_note = note;
             await sleep(1000);
         }
@@ -1024,12 +1033,10 @@ async function beginQuestioning() {
 
 async function askQuestion() {
     if (S.qIndex >= S.questions.length) {
-        // Meal: offer deep dive
         if (S.threshold.id === 'meal' && !S.deepDive && S.threshold.deepDiveQuestions) {
             await speak("Is there anything about how the meal landed you'd like to explore further? Say 'go deeper', or 'done' to finish.");
             setHint("say 'go deeper' or 'done'");
             setLabel('listening...');
-
             const started = await startRecording();
             if (!started) { await finish(); return; }
             await sleep(5000);
@@ -1049,10 +1056,8 @@ async function askQuestion() {
     setQuestion(q);
     setLabel(`question ${S.qIndex + 1} of ${S.questions.length}`);
     setHint("say 'next' when ready");
-
     await speak(q);
     await sleep(600);
-
     await listenForAnswer();
 }
 
@@ -1060,13 +1065,10 @@ async function askQuestion() {
 async function listenForAnswer() {
     S.phase = 'listening';
     S.nextTriggered = false;
-
     const started = await startRecording();
     if (!started) { await processCurrentAnswer(); return; }
-
     setLabel('listening...');
 
-    // Start speech recognition to detect "next"
     startRecognition(async () => {
         if (!S.nextTriggered) {
             S.nextTriggered = true;
@@ -1074,7 +1076,6 @@ async function listenForAnswer() {
         }
     });
 
-    // Safety timeout: 3 minutes max per answer
     const timeout = setTimeout(async () => {
         if (!S.nextTriggered) {
             S.nextTriggered = true;
@@ -1083,7 +1084,6 @@ async function listenForAnswer() {
         }
     }, 180000);
 
-    // Poll for next triggered (from either speech recognition or tap)
     await new Promise(resolve => {
         const check = setInterval(() => {
             if (S.nextTriggered) {
@@ -1121,7 +1121,6 @@ async function finish() {
     setLabel('completing...');
     setPractice(''); setQuestion('');
     setHint('');
-
     await speak("One moment.");
     setGlow('processing');
 
@@ -1162,19 +1161,16 @@ function resetUI() {
 // ════════════════════════════════════════════════════════
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// Pre-load voices
 if (window.speechSynthesis) {
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 }
 
-// Register service worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
 }
 
-// Init
 initAuth();
 
 </script>
