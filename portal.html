@@ -9,13 +9,13 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --bg: #0a0a09;
+            --bg:      #0a0a09;
             --surface: #111110;
-            --border: rgba(180,140,70,0.15);
-            --text: rgba(220,200,170,0.88);
-            --text2: rgba(175,155,120,0.62);
-            --text3: rgba(130,110,80,0.40);
-            --amber: rgba(190,130,40,0.85);
+            --border:  rgba(180,140,70,0.15);
+            --text:    rgba(220,200,170,0.88);
+            --text2:   rgba(175,155,120,0.62);
+            --text3:   rgba(130,110,80,0.40);
+            --amber:   rgba(190,130,40,0.85);
         }
         body {
             background: var(--bg); color: var(--text);
@@ -25,7 +25,7 @@
 
         header {
             display: flex; align-items: baseline; gap: 2rem;
-            margin-bottom: 3rem; border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem; border-bottom: 1px solid var(--border);
             padding-bottom: 1.5rem;
         }
         .portal-title {
@@ -38,20 +38,23 @@
             font-size: 0.78rem; color: var(--text3);
         }
 
-        /* Auth */
+        /* ── Auth ── */
         #auth-panel {
             max-width: 340px; display: flex;
             flex-direction: column; gap: 0.8rem; margin-top: 3rem;
         }
-        input {
+        input[type="email"],
+        input[type="password"] {
             width: 100%; background: var(--surface);
             border: 1px solid var(--border); color: var(--text);
             padding: 0.75rem 1rem; font-family: 'Lora', serif;
             font-size: 0.85rem; border-radius: 3px; outline: none;
             transition: border-color 0.3s;
         }
-        input:focus { border-color: rgba(190,130,40,0.4); }
-        input::placeholder { color: var(--text3); }
+        input[type="email"]:focus,
+        input[type="password"]:focus { border-color: rgba(190,130,40,0.4); }
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder { color: var(--text3); }
 
         button {
             padding: 0.75rem 1.5rem;
@@ -64,7 +67,26 @@
         }
         button:hover { background: rgba(190,130,40,0.18); }
 
-        /* Controls */
+        /* ── Tab Nav ── */
+        .tab-nav {
+            display: flex; margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .tab-btn {
+            padding: 0.65rem 1.5rem;
+            background: none; border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text3);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.8rem; font-weight: 300;
+            letter-spacing: 0.22em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.25s;
+            border-radius: 0; margin-bottom: -1px;
+        }
+        .tab-btn:hover { color: var(--text2); background: none; }
+        .tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+        /* ── Logs Controls ── */
         #controls {
             display: flex; gap: 1rem; flex-wrap: wrap;
             align-items: center; margin-bottom: 2rem;
@@ -82,19 +104,16 @@
         }
         .btn-export:hover { background: rgba(60,130,100,0.22); }
 
-        /* Stats bar */
+        /* ── Stats bar ── */
         #stats-bar {
             display: flex; gap: 2rem; margin-bottom: 1.5rem;
             font-size: 0.76rem; color: var(--text3); letter-spacing: 0.08em;
         }
         #stats-bar span { color: var(--text2); }
 
-        /* Table */
+        /* ── Table ── */
         .table-wrap { overflow-x: auto; }
-        table {
-            width: 100%; border-collapse: collapse;
-            font-size: 0.83rem;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
         th {
             text-align: left; padding: 0.6rem 0.8rem;
             font-family: 'Cormorant Garamond', serif;
@@ -103,7 +122,8 @@
             color: var(--text3); border-bottom: 1px solid var(--border);
         }
         td {
-            padding: 0.75rem 0.8rem; border-bottom: 1px solid rgba(180,140,70,0.06);
+            padding: 0.75rem 0.8rem;
+            border-bottom: 1px solid rgba(180,140,70,0.06);
             vertical-align: top; color: var(--text2);
         }
         tr:hover td { background: rgba(255,255,255,0.015); }
@@ -116,11 +136,11 @@
             border: 1px solid rgba(190,130,40,0.18);
             color: var(--amber);
         }
-        .badge.meal      { background: rgba(60,130,80,0.1);  border-color: rgba(60,130,80,0.2);  color: rgba(100,180,120,0.8); }
-        .badge.morning   { background: rgba(130,100,40,0.1); border-color: rgba(130,100,40,0.2); color: rgba(190,150,70,0.8); }
-        .badge.training  { background: rgba(130,60,60,0.1);  border-color: rgba(130,60,60,0.2);  color: rgba(200,110,100,0.8); }
-        .badge.evening   { background: rgba(70,80,130,0.1);  border-color: rgba(70,80,130,0.2);  color: rgba(130,140,200,0.8); }
-        .badge.weekly    { background: rgba(90,60,130,0.1);  border-color: rgba(90,60,130,0.2);  color: rgba(160,130,200,0.8); }
+        .badge.meal     { background: rgba(60,130,80,0.1);  border-color: rgba(60,130,80,0.2);  color: rgba(100,180,120,0.8); }
+        .badge.morning  { background: rgba(130,100,40,0.1); border-color: rgba(130,100,40,0.2); color: rgba(190,150,70,0.8); }
+        .badge.training { background: rgba(130,60,60,0.1);  border-color: rgba(130,60,60,0.2);  color: rgba(200,110,100,0.8); }
+        .badge.evening  { background: rgba(70,80,130,0.1);  border-color: rgba(70,80,130,0.2);  color: rgba(130,140,200,0.8); }
+        .badge.weekly   { background: rgba(90,60,130,0.1);  border-color: rgba(90,60,130,0.2);  color: rgba(160,130,200,0.8); }
 
         .summary-cell { max-width: 500px; }
         .summary-cell details summary {
@@ -131,14 +151,12 @@
         .summary-cell details summary::-webkit-details-marker { display: none; }
         .json-view {
             margin-top: 0.5rem; padding: 0.75rem;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
             border-radius: 3px; font-family: 'Courier New', monospace;
             font-size: 0.72rem; color: var(--text3);
             white-space: pre-wrap; word-break: break-all;
             max-height: 300px; overflow-y: auto;
         }
-
         .no-data {
             text-align: center; padding: 4rem 2rem;
             color: var(--text3); font-style: italic;
@@ -147,10 +165,139 @@
         .logout-btn {
             position: fixed; top: 1.5rem; right: 1.5rem;
             font-size: 0.65rem; color: var(--text3);
+            padding: 0.4rem 0.8rem;
         }
-
         #login-error { font-size: 0.75rem; color: rgba(200,80,70,0.7); min-height: 1rem; }
         #load-more { display: none; margin: 2rem auto; }
+
+        /* ── Shared panel styles ── */
+        .panel-header { margin-bottom: 2rem; }
+        .panel-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem; font-weight: 300;
+            letter-spacing: 0.22em; text-transform: uppercase;
+            color: var(--text2); margin-bottom: 0.5rem;
+        }
+        .panel-desc {
+            font-size: 0.76rem; color: var(--text3);
+            font-style: italic; line-height: 1.65; max-width: 520px;
+        }
+
+        /* ── Save confirm indicator ── */
+        .save-confirm {
+            font-size: 0.68rem; color: rgba(100,170,110,0.8);
+            letter-spacing: 0.1em; opacity: 0;
+            transition: opacity 0.3s; min-width: 1.2rem;
+            flex-shrink: 0;
+        }
+        .save-confirm.visible { opacity: 1; }
+
+        /* ── Settings Panel ── */
+        .settings-grid { max-width: 580px; }
+        .setting-row {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 1.3rem 0;
+            border-bottom: 1px solid var(--border);
+            gap: 2rem;
+        }
+        .setting-info { flex: 1; min-width: 0; }
+        .setting-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.82rem; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--text2);
+            margin-bottom: 0.3rem;
+        }
+        .setting-desc-inline {
+            font-size: 0.72rem; color: var(--text3);
+            font-style: italic; line-height: 1.5;
+        }
+        .setting-control {
+            display: flex; align-items: center;
+            gap: 0.7rem; flex-shrink: 0;
+        }
+
+        /* ── Toggle (challenge rationalizing) ── */
+        .toggle-wrap { display: flex; align-items: center; gap: 0.5rem; }
+        .toggle-label { font-size: 0.7rem; color: var(--text3); letter-spacing: 0.06em; }
+        .toggle {
+            position: relative; display: inline-block;
+            width: 40px; height: 22px;
+            cursor: pointer; flex-shrink: 0;
+        }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; inset: 0;
+            background: rgba(180,140,70,0.1);
+            border: 1px solid rgba(180,140,70,0.2);
+            border-radius: 11px; transition: all 0.3s;
+        }
+        .toggle-slider:before {
+            content: ''; position: absolute;
+            width: 16px; height: 16px; left: 2px; top: 2px;
+            background: rgba(180,140,70,0.4);
+            border-radius: 50%; transition: all 0.3s;
+        }
+        .toggle input:checked + .toggle-slider {
+            background: rgba(190,130,40,0.22);
+            border-color: rgba(190,130,40,0.5);
+        }
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(18px);
+            background: rgba(190,130,40,0.92);
+        }
+
+        /* ── Prompts Panel ── */
+        .prompts-actions {
+            display: flex; align-items: center;
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .btn-reset-all {
+            background: none;
+            border-color: rgba(180,60,60,0.2);
+            color: rgba(175,100,90,0.6);
+            font-size: 0.7rem; padding: 0.5rem 1rem;
+        }
+        .btn-reset-all:hover { background: rgba(180,60,60,0.08); color: rgba(205,110,100,0.85); }
+        .btn-reset-all.confirming {
+            border-color: rgba(200,90,70,0.5);
+            color: rgba(215,115,95,0.95);
+        }
+
+        .prompts-list { max-width: 580px; }
+        .prompt-group { padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+        .prompt-header {
+            display: flex; align-items: center;
+            gap: 0.75rem; margin-bottom: 0.8rem;
+        }
+        .prompt-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.82rem; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--text2); flex: 1;
+        }
+        .prompt-label-sub {
+            font-size: 0.68rem; color: var(--text3);
+            font-style: italic; letter-spacing: 0;
+            text-transform: none; font-family: 'Lora', serif;
+        }
+        .btn-reset-single {
+            padding: 0.3rem 0.65rem; font-size: 0.65rem;
+            letter-spacing: 0.1em; background: none;
+            border-color: rgba(180,140,70,0.14); color: var(--text3);
+        }
+        .btn-reset-single:hover { color: var(--text2); background: none; }
+
+        .prompt-textarea {
+            width: 100%; background: var(--surface);
+            border: 1px solid var(--border); color: var(--text2);
+            padding: 0.85rem 1rem;
+            font-family: 'Lora', serif; font-style: italic;
+            font-size: 0.85rem; line-height: 1.75;
+            border-radius: 3px; outline: none;
+            resize: vertical; min-height: 88px;
+            transition: border-color 0.3s;
+        }
+        .prompt-textarea:focus { border-color: rgba(190,130,40,0.35); }
     </style>
 </head>
 <body>
@@ -162,7 +309,7 @@
     <div class="portal-sub">review portal</div>
 </header>
 
-<!-- Auth -->
+<!-- ── Auth ── -->
 <div id="auth-section">
     <div id="auth-panel">
         <input id="email" type="email" placeholder="email" autocomplete="email">
@@ -172,72 +319,342 @@
     </div>
 </div>
 
-<!-- Main content -->
+<!-- ── Main ── -->
 <div id="main-section" style="display:none">
 
-    <div id="controls">
-        <select id="filter-type" onchange="loadLogs()">
-            <option value="">all thresholds</option>
-            <option value="morning">morning</option>
-            <option value="meal">meal</option>
-            <option value="pre_training">pre-training</option>
-            <option value="post_training">post-training</option>
-            <option value="evening">evening</option>
-            <option value="pre_bed">pre-bed</option>
-            <option value="weekly">weekly sitting</option>
-        </select>
-        <select id="filter-days" onchange="loadLogs()">
-            <option value="30">last 30 days</option>
-            <option value="14">last 14 days</option>
-            <option value="7">last 7 days</option>
-            <option value="90">last 90 days</option>
-            <option value="365">last year</option>
-            <option value="0">all time</option>
-        </select>
-        <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="logs"     onclick="switchTab('logs')">logs</button>
+        <button class="tab-btn"        data-tab="settings" onclick="switchTab('settings')">settings</button>
+        <button class="tab-btn"        data-tab="prompts"  onclick="switchTab('prompts')">prompts</button>
+    </nav>
+
+    <!-- ════════════════════════════════
+         LOGS TAB
+    ════════════════════════════════ -->
+    <div id="tab-logs" class="tab-panel">
+        <div id="controls">
+            <select id="filter-type" onchange="loadLogs()">
+                <option value="">all thresholds</option>
+                <option value="morning">morning</option>
+                <option value="meal">meal</option>
+                <option value="pre_training">pre-training</option>
+                <option value="post_training">post-training</option>
+                <option value="evening">evening</option>
+                <option value="pre_bed">pre-bed</option>
+                <option value="weekly">weekly sitting</option>
+            </select>
+            <select id="filter-days" onchange="loadLogs()">
+                <option value="30">last 30 days</option>
+                <option value="14">last 14 days</option>
+                <option value="7">last 7 days</option>
+                <option value="90">last 90 days</option>
+                <option value="365">last year</option>
+                <option value="0">all time</option>
+            </select>
+            <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+        </div>
+        <div id="stats-bar">
+            <div>entries: <span id="stat-count">—</span></div>
+            <div>first entry: <span id="stat-first">—</span></div>
+            <div>last entry: <span id="stat-last">—</span></div>
+        </div>
+        <div class="table-wrap">
+            <table id="logs-table">
+                <thead>
+                    <tr>
+                        <th>date</th><th>time</th><th>threshold</th>
+                        <th>detail</th><th>summary</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-body">
+                    <tr><td colspan="5" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <button id="load-more" onclick="loadMore()">Load more</button>
     </div>
 
-    <div id="stats-bar">
-        <div>entries: <span id="stat-count">—</span></div>
-        <div>first entry: <span id="stat-first">—</span></div>
-        <div>last entry: <span id="stat-last">—</span></div>
+    <!-- ════════════════════════════════
+         SETTINGS TAB
+    ════════════════════════════════ -->
+    <div id="tab-settings" class="tab-panel" style="display:none">
+        <div class="panel-header">
+            <div class="panel-title">coach calibration</div>
+            <div class="panel-desc">Adjust how the coaching presence speaks. Changes are saved immediately and take effect at the start of the next session.</div>
+        </div>
+        <div class="settings-grid">
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">tone</div>
+                    <div class="setting-desc-inline">Overall warmth and directness of the coaching voice</div>
+                </div>
+                <div class="setting-control">
+                    <select id="s-tone" onchange="saveSetting('tone', this.value)">
+                        <option value="warm and direct">warm and direct</option>
+                        <option value="neutral and observational">neutral and observational</option>
+                        <option value="firm and challenging">firm and challenging</option>
+                    </select>
+                    <span class="save-confirm" id="confirm-tone"></span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">firmness</div>
+                    <div class="setting-desc-inline">How hard the coach pushes back when you rationalize rather than witness</div>
+                </div>
+                <div class="setting-control">
+                    <select id="s-firmness" onchange="saveSetting('firmness', this.value)">
+                        <option value="gentle">gentle</option>
+                        <option value="medium">medium</option>
+                        <option value="firm">firm</option>
+                    </select>
+                    <span class="save-confirm" id="confirm-firmness"></span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">verbosity</div>
+                    <div class="setting-desc-inline">Length of coaching responses between your answers</div>
+                </div>
+                <div class="setting-control">
+                    <select id="s-verbosity" onchange="saveSetting('verbosity', this.value)">
+                        <option value="concise">concise</option>
+                        <option value="moderate">moderate</option>
+                        <option value="expansive">expansive</option>
+                    </select>
+                    <span class="save-confirm" id="confirm-verbosity"></span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">challenge rationalizing</div>
+                    <div class="setting-desc-inline">Whether the coach actively names when you appear to be overriding recovery signals rather than reading them honestly</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-wrap">
+                        <span class="toggle-label">no</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="s-challenge_rationalizing"
+                                   onchange="saveSetting('challenge_rationalizing', this.checked ? 'yes' : 'no')">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">yes</span>
+                    </div>
+                    <span class="save-confirm" id="confirm-challenge_rationalizing"></span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">framework emphasis</div>
+                    <div class="setting-desc-inline">Which lens the coach leans into when interpreting what you share</div>
+                </div>
+                <div class="setting-control">
+                    <select id="s-framework_emphasis" onchange="saveSetting('framework_emphasis', this.value)">
+                        <option value="balanced">balanced</option>
+                        <option value="ayurvedic-leaning">ayurvedic-leaning</option>
+                        <option value="tcm-leaning">tcm-leaning</option>
+                        <option value="biometric-leaning">biometric-leaning</option>
+                    </select>
+                    <span class="save-confirm" id="confirm-framework_emphasis"></span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">language style</div>
+                    <div class="setting-desc-inline">Register and vocabulary the coach chooses — how it reaches for its words</div>
+                </div>
+                <div class="setting-control">
+                    <select id="s-language_style" onchange="saveSetting('language_style', this.value)">
+                        <option value="conversational">conversational</option>
+                        <option value="more clinical">more clinical</option>
+                        <option value="more poetic">more poetic</option>
+                    </select>
+                    <span class="save-confirm" id="confirm-language_style"></span>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="table-wrap">
-        <table id="logs-table">
-            <thead>
-                <tr>
-                    <th>date</th>
-                    <th>time</th>
-                    <th>threshold</th>
-                    <th>detail</th>
-                    <th>summary</th>
-                </tr>
-            </thead>
-            <tbody id="logs-body">
-                <tr><td colspan="5" class="no-data">Loading...</td></tr>
-            </tbody>
-        </table>
+    <!-- ════════════════════════════════
+         PROMPTS TAB
+    ════════════════════════════════ -->
+    <div id="tab-prompts" class="tab-panel" style="display:none">
+        <div class="panel-header">
+            <div class="panel-title">practice texts</div>
+            <div class="panel-desc">Edit the threshold practice texts. Saving happens on blur — tap or click outside a field after editing. Individual reset buttons restore that field to the original foundation document text. Reset all does the same for every field at once.</div>
+        </div>
+        <div class="prompts-actions">
+            <button class="btn-reset-all" id="btn-reset-all" onclick="resetAllPrompts()">reset all to original</button>
+        </div>
+        <div class="prompts-list">
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">morning</span>
+                    <button class="btn-reset-single" onclick="resetPrompt('morning')">reset</button>
+                    <span class="save-confirm" id="confirm-p-morning"></span>
+                </div>
+                <textarea id="p-morning" class="prompt-textarea" onblur="savePrompt('morning')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">meal</span>
+                    <button class="btn-reset-single" onclick="resetPrompt('meal')">reset</button>
+                    <span class="save-confirm" id="confirm-p-meal"></span>
+                </div>
+                <textarea id="p-meal" class="prompt-textarea" onblur="savePrompt('meal')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">pre-training <span class="prompt-label-sub">— general</span></span>
+                    <button class="btn-reset-single" onclick="resetPrompt('pre_training_general')">reset</button>
+                    <span class="save-confirm" id="confirm-p-pre_training_general"></span>
+                </div>
+                <textarea id="p-pre_training_general" class="prompt-textarea" onblur="savePrompt('pre_training_general')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">pre-training <span class="prompt-label-sub">— boxing</span></span>
+                    <button class="btn-reset-single" onclick="resetPrompt('pre_training_boxing')">reset</button>
+                    <span class="save-confirm" id="confirm-p-pre_training_boxing"></span>
+                </div>
+                <textarea id="p-pre_training_boxing" class="prompt-textarea" onblur="savePrompt('pre_training_boxing')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">pre-training <span class="prompt-label-sub">— lifting</span></span>
+                    <button class="btn-reset-single" onclick="resetPrompt('pre_training_lifting')">reset</button>
+                    <span class="save-confirm" id="confirm-p-pre_training_lifting"></span>
+                </div>
+                <textarea id="p-pre_training_lifting" class="prompt-textarea" onblur="savePrompt('pre_training_lifting')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">post-training</span>
+                    <button class="btn-reset-single" onclick="resetPrompt('post_training')">reset</button>
+                    <span class="save-confirm" id="confirm-p-post_training"></span>
+                </div>
+                <textarea id="p-post_training" class="prompt-textarea" onblur="savePrompt('post_training')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">evening</span>
+                    <button class="btn-reset-single" onclick="resetPrompt('evening')">reset</button>
+                    <span class="save-confirm" id="confirm-p-evening"></span>
+                </div>
+                <textarea id="p-evening" class="prompt-textarea" onblur="savePrompt('evening')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">pre-bed</span>
+                    <button class="btn-reset-single" onclick="resetPrompt('pre_bed')">reset</button>
+                    <span class="save-confirm" id="confirm-p-pre_bed"></span>
+                </div>
+                <textarea id="p-pre_bed" class="prompt-textarea" style="min-height:120px" onblur="savePrompt('pre_bed')"></textarea>
+            </div>
+
+            <div class="prompt-group">
+                <div class="prompt-header">
+                    <span class="prompt-label">weekly sitting</span>
+                    <button class="btn-reset-single" onclick="resetPrompt('weekly')">reset</button>
+                    <span class="save-confirm" id="confirm-p-weekly"></span>
+                </div>
+                <textarea id="p-weekly" class="prompt-textarea" onblur="savePrompt('weekly')"></textarea>
+            </div>
+
+        </div>
     </div>
 
-    <button id="load-more" onclick="loadMore()">Load more</button>
-</div>
+</div><!-- /#main-section -->
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
-// ── CONFIG ── Update these
+// ════════════════════════════════════════════════════════
+// CONFIGURATION
+// ════════════════════════════════════════════════════════
 const CONFIG = {
     SUPABASE_URL      : 'https://zfyxfetsfmncutbcnzfb.supabase.co',
     SUPABASE_ANON_KEY : 'sb_publishable_L1R9hG3qzEVoa5B4zNAHEg_M2n1BUoG',
 };
 
 const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+// ════════════════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════════════════
 let allLogs = [];
 let currentOffset = 0;
 const PAGE_SIZE = 50;
 
-// ── Auth ──
+// Default prompts — mirrors foundation document exactly.
+// A missing or deleted row in Supabase means: use these.
+const DEFAULT_PROMPTS = {
+    morning:
+        "I am here.\nThe body arrived through the night.\nWhat is being given to me this morning?",
+    meal:
+        "This is medicine or this is noise —\nI choose which one it becomes.",
+    pre_training_general:
+        "I bring what I have today, not what I wish I had.\nI leave behind the story of yesterday's session\nand last week's performance.\nThis is the only moment I can train in.",
+    pre_training_boxing:
+        "I come to meet myself here.\nNot to defeat — to understand.\nWhat I resist in the bag, I resist in myself.\nWhat I move past in the bag, I move past in myself.",
+    pre_training_lifting:
+        "I am not trying to prove anything here.\nI am asking what I am made of today —\nand I will respect the answer.",
+    post_training:
+        "You've done the work.\nNow let the body speak.",
+    evening:
+        "What moved through you today\nthat is worth naming?",
+    pre_bed:
+        "I release what today asked of me.\nWhat is unfinished will wait.\nWhat is unresolved will find its time.\nI give my body back to itself now —\nto do the work I cannot do awake.",
+    weekly:
+        "Looking at this week as a whole —\nwhere was I most myself,\nand where was I performing?"
+};
+
+const DEFAULT_SETTINGS = {
+    tone:                    'warm and direct',
+    firmness:                'medium',
+    verbosity:               'concise',
+    challenge_rationalizing: 'yes',
+    framework_emphasis:      'balanced',
+    language_style:          'conversational'
+};
+
+// ════════════════════════════════════════════════════════
+// TAB NAVIGATION
+// Panels load lazily on first visit to avoid unnecessary
+// Supabase calls when the user only needs the logs tab.
+// ════════════════════════════════════════════════════════
+const panelLoaded = { logs: false, settings: false, prompts: false };
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+    document.getElementById('tab-' + tab).style.display = 'block';
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+    if (!panelLoaded[tab]) {
+        panelLoaded[tab] = true;
+        if (tab === 'settings') loadSettingsPanel();
+        if (tab === 'prompts')  loadPromptsPanel();
+    }
+}
+
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
 async function handleLogin() {
     const email = document.getElementById('email').value.trim();
     const pwd   = document.getElementById('pwd').value;
@@ -253,6 +670,7 @@ async function handleLogout() {
     document.getElementById('auth-section').style.display = 'block';
     document.getElementById('main-section').style.display = 'none';
     document.getElementById('logout-btn').style.display   = 'none';
+    Object.keys(panelLoaded).forEach(k => panelLoaded[k] = false);
 }
 
 async function initAuth() {
@@ -264,32 +682,35 @@ function showPortal() {
     document.getElementById('auth-section').style.display = 'none';
     document.getElementById('main-section').style.display = 'block';
     document.getElementById('logout-btn').style.display   = 'block';
+    panelLoaded.logs = true;
     loadLogs();
 }
 
-// ── Load Logs ──
+// ════════════════════════════════════════════════════════
+// LOGS TAB
+// ════════════════════════════════════════════════════════
 async function loadLogs() {
-    currentOffset = 0;
-    allLogs = [];
+    currentOffset = 0; allLogs = [];
     const tbody = document.getElementById('logs-body');
     tbody.innerHTML = '<tr><td colspan="5" class="no-data">Loading...</td></tr>';
-
     const { data, error } = await fetchLogs(0);
-    if (error) { tbody.innerHTML = `<tr><td colspan="5" class="no-data">Error: ${error.message}</td></tr>`; return; }
-
+    if (error) {
+        tbody.innerHTML = `<tr><td colspan="5" class="no-data">Error: ${error.message}</td></tr>`;
+        return;
+    }
     allLogs = data || [];
-    renderLogs();
-    updateStats();
-    document.getElementById('load-more').style.display = allLogs.length === PAGE_SIZE ? 'block' : 'none';
+    renderLogs(); updateStats();
+    document.getElementById('load-more').style.display =
+        allLogs.length === PAGE_SIZE ? 'block' : 'none';
 }
 
 async function loadMore() {
     currentOffset += PAGE_SIZE;
     const { data } = await fetchLogs(currentOffset);
     if (data && data.length) {
-        allLogs = allLogs.concat(data);
-        renderLogs();
-        document.getElementById('load-more').style.display = data.length === PAGE_SIZE ? 'block' : 'none';
+        allLogs = allLogs.concat(data); renderLogs();
+        document.getElementById('load-more').style.display =
+            data.length === PAGE_SIZE ? 'block' : 'none';
     } else {
         document.getElementById('load-more').style.display = 'none';
     }
@@ -298,18 +719,15 @@ async function loadMore() {
 async function fetchLogs(offset) {
     const type = document.getElementById('filter-type').value;
     const days = parseInt(document.getElementById('filter-days').value);
-
     let query = sb.from('logs')
         .select('id, threshold_type, meal_time, training_type, summary, created_at')
         .order('created_at', { ascending: false })
         .range(offset, offset + PAGE_SIZE - 1);
-
-    if (type)  query = query.eq('threshold_type', type);
+    if (type) query = query.eq('threshold_type', type);
     if (days > 0) {
         const since = new Date(Date.now() - days * 86400000).toISOString();
         query = query.gte('created_at', since);
     }
-
     return await query;
 }
 
@@ -320,13 +738,12 @@ function renderLogs() {
         return;
     }
     tbody.innerHTML = allLogs.map(log => {
-        const dt   = new Date(log.created_at);
-        const date = dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
-        const time = dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-        const badge = getBadge(log.threshold_type);
+        const dt     = new Date(log.created_at);
+        const date   = dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
+        const time   = dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+        const badge  = getBadge(log.threshold_type);
         const detail = getDetail(log);
         const snippet = getSnippet(log.summary);
-
         return `<tr>
             <td>${date}</td>
             <td style="color:var(--text3);font-size:0.8rem">${time}</td>
@@ -374,7 +791,6 @@ function getSnippet(summary) {
     ];
     const val = candidates.find(v => v && typeof v === 'string' && v.length > 3);
     if (!val) {
-        // Show first non-null field
         for (const [k,v] of Object.entries(summary)) {
             if (k !== 'threshold_type' && k !== 'is_supplemental' && v !== null && v !== undefined) {
                 return `${k.replace(/_/g,' ')}: ${v}`;
@@ -384,7 +800,6 @@ function getSnippet(summary) {
     }
     return val.length > 100 ? val.slice(0, 100) + '…' : val;
 }
-
 function updateStats() {
     document.getElementById('stat-count').textContent = allLogs.length;
     if (allLogs.length) {
@@ -397,31 +812,22 @@ function updateStats() {
 
 // ── CSV Export ──
 async function exportCSV() {
-    // Fetch ALL logs for export (ignore pagination)
     const type = document.getElementById('filter-type').value;
     const days = parseInt(document.getElementById('filter-days').value);
-
-    let query = sb.from('logs')
-        .select('*')
-        .order('created_at', { ascending: true });
+    let query = sb.from('logs').select('*').order('created_at', { ascending: true });
     if (type) query = query.eq('threshold_type', type);
     if (days > 0) {
         const since = new Date(Date.now() - days * 86400000).toISOString();
         query = query.gte('created_at', since);
     }
-
     const { data, error } = await query;
     if (error || !data || !data.length) { alert('No data to export.'); return; }
-
-    // Collect all unique keys from summary objects
     const summaryKeys = new Set();
     data.forEach(row => {
         if (row.summary && typeof row.summary === 'object') {
             Object.keys(row.summary).forEach(k => summaryKeys.add(k));
         }
     });
-
-    // Build CSV
     const baseHeaders = ['id','created_at','threshold_type','meal_time','training_type'];
     const allHeaders  = [...baseHeaders, ...summaryKeys];
     const escape = v => {
@@ -429,15 +835,13 @@ async function exportCSV() {
         const s = String(v).replace(/"/g,'""');
         return s.includes(',') || s.includes('\n') || s.includes('"') ? `"${s}"` : s;
     };
-
     const rows = [allHeaders.join(',')];
     data.forEach(row => {
         const values = baseHeaders.map(h => escape(row[h]));
         summaryKeys.forEach(k => values.push(escape(row.summary?.[k] ?? '')));
         rows.push(values.join(','));
     });
-
-    const csv = rows.join('\n');
+    const csv  = rows.join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -447,7 +851,125 @@ async function exportCSV() {
     document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
+// ════════════════════════════════════════════════════════
+// SHARED UTILITIES
+// ════════════════════════════════════════════════════════
+async function getCurrentUserId() {
+    const { data: { session } } = await sb.auth.getSession();
+    return session?.user?.id || null;
+}
+
+function showSaveConfirm(id) {
+    const el = document.getElementById('confirm-' + id);
+    if (!el) return;
+    el.textContent = '✓';
+    el.classList.add('visible');
+    setTimeout(() => el.classList.remove('visible'), 1600);
+}
+
+// ════════════════════════════════════════════════════════
+// SETTINGS TAB
+// ════════════════════════════════════════════════════════
+async function loadSettingsPanel() {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    const { data } = await sb.from('settings').select('key, value').eq('user_id', userId);
+    const saved = {};
+    (data || []).forEach(row => saved[row.key] = row.value);
+    Object.entries(DEFAULT_SETTINGS).forEach(([key, def]) => {
+        const val = saved[key] !== undefined ? saved[key] : def;
+        const el  = document.getElementById('s-' + key);
+        if (!el) return;
+        if (el.type === 'checkbox') {
+            el.checked = (val === 'yes');
+        } else {
+            el.value = val;
+        }
+    });
+}
+
+async function saveSetting(key, value) {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await sb.from('settings').upsert(
+        { user_id: userId, key, value, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,key' }
+    );
+    showSaveConfirm(key);
+}
+
+// ════════════════════════════════════════════════════════
+// PROMPTS TAB
+// ════════════════════════════════════════════════════════
+async function loadPromptsPanel() {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    const { data } = await sb.from('prompts')
+        .select('prompt_key, practice_text')
+        .eq('user_id', userId);
+    const saved = {};
+    (data || []).forEach(row => { if (row.practice_text) saved[row.prompt_key] = row.practice_text; });
+    Object.keys(DEFAULT_PROMPTS).forEach(key => {
+        const el = document.getElementById('p-' + key);
+        if (el) el.value = saved[key] !== undefined ? saved[key] : DEFAULT_PROMPTS[key];
+    });
+}
+
+async function savePrompt(key) {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    const el = document.getElementById('p-' + key);
+    if (!el) return;
+    await sb.from('prompts').upsert(
+        { user_id: userId, prompt_key: key, practice_text: el.value, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,prompt_key' }
+    );
+    showSaveConfirm('p-' + key);
+}
+
+async function resetPrompt(key) {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    const el = document.getElementById('p-' + key);
+    if (el) el.value = DEFAULT_PROMPTS[key] || '';
+    await sb.from('prompts').delete()
+        .eq('user_id', userId)
+        .eq('prompt_key', key);
+    showSaveConfirm('p-' + key);
+}
+
+// Two-step reset all — avoids browser confirm() on iOS PWA.
+// First tap sets confirming state for 3 seconds.
+// Second tap within that window executes.
+let resetAllConfirmTimeout = null;
+async function resetAllPrompts() {
+    const btn = document.getElementById('btn-reset-all');
+    if (btn.dataset.confirming === 'true') {
+        clearTimeout(resetAllConfirmTimeout);
+        btn.dataset.confirming = 'false';
+        btn.textContent = 'reset all to original';
+        btn.classList.remove('confirming');
+        const userId = await getCurrentUserId();
+        if (!userId) return;
+        await sb.from('prompts').delete().eq('user_id', userId);
+        Object.keys(DEFAULT_PROMPTS).forEach(key => {
+            const el = document.getElementById('p-' + key);
+            if (el) el.value = DEFAULT_PROMPTS[key];
+        });
+    } else {
+        btn.dataset.confirming = 'true';
+        btn.textContent = 'tap again to confirm';
+        btn.classList.add('confirming');
+        resetAllConfirmTimeout = setTimeout(() => {
+            btn.dataset.confirming = 'false';
+            btn.textContent = 'reset all to original';
+            btn.classList.remove('confirming');
+        }, 3000);
+    }
+}
+
 initAuth();
 </script>
+
 </body>
 </html>
