@@ -479,6 +479,21 @@
                 </div>
             </div>
 
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">voice speed</div>
+                    <div class="setting-desc-inline">Playback rate of the coach's spoken responses</div>
+                </div>
+                <div class="setting-control">
+                    <select id="s-tts_speed" onchange="saveSetting('tts_speed', this.value)">
+                        <option value="0.85">slower</option>
+                        <option value="1.0">normal</option>
+                        <option value="1.15">faster</option>
+                    </select>
+                    <span class="save-confirm" id="confirm-tts_speed"></span>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -630,7 +645,8 @@ const DEFAULT_SETTINGS = {
     verbosity:               'concise',
     challenge_rationalizing: 'yes',
     framework_emphasis:      'balanced',
-    language_style:          'conversational'
+    language_style:          'conversational',
+    tts_speed:               '1.0'
 };
 
 // ════════════════════════════════════════════════════════

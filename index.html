@@ -494,7 +494,7 @@ const THRESHOLDS = {
 // ════════════════════════════════════════════════════════
 // SYSTEM PROMPT
 // ════════════════════════════════════════════════════════
-const SYSTEM_PROMPT = `You are the coaching presence inside a personal contemplative practice app called Still Point.
+const BASE_SYSTEM_PROMPT = `You are the coaching presence inside a personal contemplative practice app called Still Point.
 
 The person is Adrian — a wellness practitioner, martial artist, and software developer. He is Vata-Pitta dominant (Vata primary), currently Rajas-dominant with accumulating Tamas. His TCM pattern is Wood-Fire dominant, Liver/Gallbladder primary.
 
@@ -510,6 +510,19 @@ Your role:
 - He is building a practice, not submitting a report.
 
 When generating summaries: return ONLY valid JSON matching the schema provided. No markdown, no preamble, no explanation. Just the JSON object.`;
+
+function buildSystemPrompt() {
+    const sets = S.userSettings;
+    const lines = [];
+    if (sets.tone)                    lines.push(`Tone: ${sets.tone}`);
+    if (sets.firmness)                lines.push(`Firmness level: ${sets.firmness}`);
+    if (sets.verbosity)               lines.push(`Response verbosity: ${sets.verbosity}`);
+    if (sets.challenge_rationalizing) lines.push(`Challenge rationalizing: ${sets.challenge_rationalizing}`);
+    if (sets.framework_emphasis)      lines.push(`Framework emphasis: ${sets.framework_emphasis}`);
+    if (sets.language_style)          lines.push(`Language style: ${sets.language_style}`);
+    if (!lines.length) return BASE_SYSTEM_PROMPT;
+    return BASE_SYSTEM_PROMPT + '\n\nCoach calibration:\n' + lines.join('\n');
+}
 
 // ════════════════════════════════════════════════════════
 // APP STATE
@@ -531,6 +544,8 @@ let S = {
     nextTriggered: false,
     audioEl: null,       // persistent Audio element — created once on first gesture, stays unlocked on iOS
     pendingAudio: null,  // pre-fetched TTS audio for first tap unlock
+    userSettings: {},    // loaded from Supabase settings table on login
+    userPrompts: {},     // loaded from Supabase prompts table on login
 };
 
 // ════════════════════════════════════════════════════════
@@ -561,6 +576,7 @@ function showMain() {
     document.getElementById('logout-btn').style.display   = 'block';
     setLabel('ready');
     setHint('tap and tell me where you are');
+    fetchUserData();
 }
 
 // ════════════════════════════════════════════════════════
@@ -583,6 +599,8 @@ async function handleLogout() {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('main-screen').style.display  = 'none';
     document.getElementById('logout-btn').style.display   = 'none';
+    S.userSettings = {};
+    S.userPrompts = {};
     resetState();
 }
 
@@ -617,6 +635,25 @@ async function handleSetPassword() {
     window.history.replaceState(null, '', window.location.pathname);
     document.getElementById('set-pwd-screen').style.display = 'none';
     showMain();
+}
+
+// ════════════════════════════════════════════════════════
+// USER DATA — settings & prompts from Supabase
+// ════════════════════════════════════════════════════════
+async function fetchUserData() {
+    if (!S.user) return;
+    const userId = S.user.id;
+
+    const [{ data: settingsData }, { data: promptsData }] = await Promise.all([
+        sb.from('settings').select('key, value').eq('user_id', userId),
+        sb.from('prompts').select('prompt_key, practice_text').eq('user_id', userId)
+    ]);
+
+    S.userSettings = {};
+    (settingsData || []).forEach(row => { S.userSettings[row.key] = row.value; });
+
+    S.userPrompts = {};
+    (promptsData || []).forEach(row => { if (row.practice_text) S.userPrompts[row.prompt_key] = row.practice_text; });
 }
 
 // ════════════════════════════════════════════════════════
@@ -696,7 +733,7 @@ async function speak(text) {
         const res = await fetch('/.netlify/functions/tts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: clean })
+            body: JSON.stringify({ text: clean, speed: parseFloat(S.userSettings.tts_speed) || 1.0 })
         });
 
         if (!res.ok) throw new Error('TTS failed');
@@ -808,7 +845,7 @@ async function claude(messages, system, _attempt = 0) {
         const res = await fetch('/.netlify/functions/claude', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages, system: system || SYSTEM_PROMPT })
+            body: JSON.stringify({ messages, system: system || buildSystemPrompt() })
         });
 
         // 529/503 — overloaded, retry with exponential backoff
@@ -1021,12 +1058,16 @@ async function processThresholdSelection() {
 async function beginPractice() {
     S.phase = 'practicing';
 
-    let practiceText = S.threshold.practiceText;
-
+    let practiceText;
     if (S.threshold.id === 'pre_training') {
-        if (S.trainingType === 'boxing') practiceText = S.threshold.boxingText;
-        else if (S.trainingType === 'lifting') practiceText = S.threshold.liftingText;
-        else practiceText = S.threshold.generalText;
+        if (S.trainingType === 'boxing')
+            practiceText = S.userPrompts.pre_training_boxing || S.threshold.boxingText;
+        else if (S.trainingType === 'lifting')
+            practiceText = S.userPrompts.pre_training_lifting || S.threshold.liftingText;
+        else
+            practiceText = S.userPrompts.pre_training_general || S.threshold.generalText;
+    } else {
+        practiceText = S.userPrompts[S.threshold.id] || S.threshold.practiceText;
     }
 
     setLabel(S.threshold.label.toLowerCase());
